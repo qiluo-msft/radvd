@@ -1,75 +1,17 @@
 #!/usr/bin/make -f
-include debian/scripts/vars
-BUILD_DIR=$(SOURCE_DIR)/$(TAR_DIR)
-NOISY=1
-export NOISY
 
-$(STAMP_DIR)/source.make:
-	$(MAKE) -f debian/sys-build.mk source.make
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
 
-configure: $(STAMP_DIR)/configure
-$(STAMP_DIR)/configure: $(STAMP_DIR)/source.make
-	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD="./configure --sysconfdir=/etc --prefix=/usr --mandir=/usr/share/man"
-	touch $@
+DEB_UPDATE_RCD_PARAMS = defaults 50
 
-build: $(STAMP_DIR)/build
-$(STAMP_DIR)/build: $(STAMP_DIR)/configure $(STAMP_DIR)/source.make
-	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD="$(MAKE) all"
-	touch $@
-
-clean:
-# No need to run clean
-	$(MAKE) -f debian/sys-build.mk source.clean
-	rm -f $(STAMP_DIR)
-	rm -f debian/copyright
-	dh_clean
-
-binary-indep: build
-# Add rules here to build the indep debs.
-
-docs = $(patsubst %,$(BUILD_DIR)/%,INTRO.html TODO)
-copyright = $(BUILD_DIR)/COPYRIGHT
-changelog = $(BUILD_DIR)/CHANGES
-examples = debian/radvd.conf
-debian/copyright: debian/copyright.in $(copyright)
+debian/copyright: debian/copyright.in COPYRIGHT
 	cat $^ > $@
 
-install: build
-	dh_clean -k
-	dh_testdir
-	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD="$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp"
+pre-build:: debian/copyright 
 
-binary-static: build
-	rm -f $(patsubst %,$(BUILD_DIR)/%,radvd radvdump)
-	$(MAKE) -f debian/sys-build.mk source.command SOURCE_CMD="$(MAKE) LDFLAGS=--static radvd radvdump"
-	$(MAKE) -f debian/rules binary-arch
-
-binary-arch: install debian/copyright
-# Add rules here to build the arch debs.
-#	dh_testversion
-	dh_testdir
-	dh_testroot
-	dh_installdocs $(docs)
-	dh_installexamples $(examples)
-#	dh_installmenu
-#	dh_installemacsen
-	dh_installinit --update-rcd-params="defaults 50"
-	install -m 644 debian/radvd.conf `pwd`/debian/tmp/etc
-	dh_installcron
-#	dh_installmanpages
-#	dh_undocumented
-	dh_installchangelogs $(changelog)
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_suidregister
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-#	dh_makeshlibs
-	dh_md5sums
-	dh_builddeb
-
-
-binary: binary-indep binary-arch
+common-install-prehook-arch::
+	install -m 644 debian/simple-radvd.conf `pwd`/debian/radvd/usr/share/doc/radvd/examples/
+	install -m 644 radvd.conf.example `pwd`/debian/radvd/usr/share/doc/radvd/examples/

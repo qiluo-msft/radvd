@@ -1,0 +1,48 @@
+--- radvd-0.7.2.orig/debian/patches/01-linux-2.6.patch
++++ radvd-0.7.2/debian/patches/01-linux-2.6.patch
+@@ -0,0 +1,45 @@
++Index: pathnames.h
++===================================================================
++RCS file: /work/cvsroot/radvd/pathnames.h,v
++retrieving revision 1.4
++diff -u -r1.4 pathnames.h
++--- pathnames.h	28 Dec 2001 07:25:11 -0000	1.4
+++++ pathnames.h	19 Jan 2004 19:18:35 -0000
++@@ -34,6 +34,7 @@
++ 
++ #ifdef __linux__
++ #define SYSCTL_IP6_FORWARDING CTL_NET, NET_IPV6, NET_IPV6_CONF, NET_PROTO_CONF_ALL, NET_IPV6_FORWARDING
+++#define PROC_SYS_IP6_FORWARDING "/proc/sys/net/ipv6/conf/all/forwarding"
++ #else /* BSD */
++ #define SYSCTL_IP6_FORWARDING CTL_NET, PF_INET6, IPPROTO_IPV6, IPV6CTL_FORWARDING
++ #endif
++Index: radvd.c
++===================================================================
++RCS file: /work/cvsroot/radvd/radvd.c,v
++retrieving revision 1.14
++diff -u -r1.14 radvd.c
++--- radvd.c	7 Jan 2004 08:18:39 -0000	1.14
+++++ radvd.c	19 Jan 2004 19:18:35 -0000
++@@ -485,8 +485,21 @@
++ 	int forw_sysctl[] = { SYSCTL_IP6_FORWARDING };
++ 	int value;
++ 	size_t size = sizeof(value);
+++	FILE *fp = NULL;
++ 
++-	if (sysctl(forw_sysctl, sizeof(forw_sysctl)/sizeof(forw_sysctl[0]),
+++#ifdef __linux__
+++	fp = fopen(PROC_SYS_IP6_FORWARDING, "r");
+++	if (fp) {
+++		fscanf(fp, "%d", &value);
+++		fclose(fp);
+++	}
+++	else
+++		log(LOG_DEBUG, "Correct IPv6 forwarding procfs entry not found, "
+++	                       "perhaps the procfs is disabled, "
+++	                        "or the kernel interface has changed?");
+++#endif /* __linux__ */
+++
+++	if (!fp && sysctl(forw_sysctl, sizeof(forw_sysctl)/sizeof(forw_sysctl[0]),
++ 	    &value, &size, NULL, 0) < 0) {
++ 		log(LOG_DEBUG, "Correct IPv6 forwarding sysctl branch not found, "
++ 			"perhaps the kernel interface has changed?");

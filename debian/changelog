@@ -1,3 +1,97 @@
+radvd (1:0.7.3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Upload to unstable.
+
+ -- Andreas Rottmann <rotty@debian.org>  Tue, 22 Feb 2005 19:47:02 +0100
+
+radvd (1:0.7.2+0.7.3rc1-1) experimental; urgency=low
+
+  * New upstream release (0.7.3 release candidate).
+    - Fixes hang/sendmsg issue (closes: #287863).
+    - Drop patches integrated upstream: 02-radvd_conf_man.patch.
+  * Now runs as user radvd (closes: #242471).
+  * radvd.init: check for and remove stale pidfile (closes: #293789).
+  * control: tighten dependency on debhelper.
+  
+ -- Andreas Rottmann <rotty@debian.org>  Sat, 19 Feb 2005 12:56:08 +0100
+
+radvd (1:0.7.2-7) unstable; urgency=low
+
+  * Fix restart initscript action (closes: #278369).
+
+ -- Andreas Rottmann <rotty@debian.org>  Mon, 29 Nov 2004 14:30:26 +0100
+
+radvd (1:0.7.2-6) unstable; urgency=low
+
+  * Applied patch by Fabio Massimo Di Nitto, thanks. (closes: #273892).
+  * Now using documentation prefix instead of deprectated 
+    site-local prefix (closes: #242473).
+  * Also install the upstream example (radvd.conf.example).
+  
+ -- Andreas Rottmann <rotty@debian.org>  Sun,  3 Oct 2004 17:27:35 +0200
+
+radvd (1:0.7.2-5) unstable; urgency=low
+
+  * Don't install a config file in /etc anymore (see, 
+    and closes: #225558).  Instead output a more verbose message in 
+    the init script, telling the user how to configure it.
+    Config file previously in /etc now shipped in 
+    /usr/share/doc/radvd/examples/simple-radvd.conf.
+  
+ -- Andreas Rottmann <rotty@debian.org>  Mon,  1 Mar 2004 21:54:24 +0100
+
+radvd (1:0.7.2-4) unstable; urgency=low
+
+  * debian/init: Don't try to restore state of interfaces that are down
+    (closes: #233499).
+  * New patch 03-if-names-relax.patch, which allows [:.-_] to be used in
+    interface names (closes: #200868).
+
+ -- Andreas Rottmann <rotty@debian.org>  Sun, 22 Feb 2004 16:47:01 +0100
+
+radvd (1:0.7.2-3) unstable; urgency=low
+
+  * New patch 02-radvd_conf_man.patch, fixes AdvValidLifetime default 
+    manpage error (closes: #226027).
+  * New patch 01-linux-2.6.patch, which fixes the warning on Linux 2.6
+    (posted on radvd-devel-l by Pekka Savola <pekkas@netcore.fi>).
+  * debian/rules: Include simple-patchsys.mk.
+  * debian/init: Save forwarding configuration of interfaces at start time
+    and restore them at stop time (closes: #224197).
+  * debian/README: Document that the forwarding state is safed/restored.
+  * debian/copyright: 
+    + Point to download dir, not file.
+    + Remove "no modification was needed" line.
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu,  1 Jan 2004 21:16:33 +0100
+
+radvd (1:0.7.2-2) unstable; urgency=low
+
+  * radvd.8.man: Fixed --method, which should read --logmethod 
+    (closes: #221246).
+  * debian/control: Standards-Version 3.5.1 (no changes).
+  * debian/rules: Switched to CDBS (from CBS).
+  
+ -- Andreas Rottmann <rotty@debian.org>  Wed, 19 Nov 2003 23:22:30 +0100
+
+radvd (1:0.7.2-1) unstable; urgency=low
+
+  * New upstream release.
+     + Adds support for VLANs (closes: #166002).
+  * Now using CBS.
+     + Build-Depend on autotools-dev, so CBS can use current
+       config.{guess,sub}.
+  * Build-Depend on debhelper v4.
+
+ -- Andreas Rottmann <rotty@debian.org>  Sun, 23 Feb 2003 21:09:47 +0100
+
+radvd (1:0.7.1-6) unstable; urgency=low
+
+  * Now checking wether IPv6 is enabled in init script. (closes: #155961)
+
+ -- Andreas Rottmann <rotty@debian.org>  Fri,  9 Aug 2002 15:21:59 +0200
+
 radvd (1:0.7.1-5) unstable; urgency=low
 
   * Corrected spelling in package description. (closes: #140978)
