@@ -1,0 +1,13 @@
+radvd for Debian
+----------------
+
+radvd comes with a defualt configuration in /etc/radvd.conf that advertises
+site-local (fec0::/64) addresses on eth0. If you want to use other addresses
+or another interface, please change radvd.conf to your needs.
+
+Furthermore, radvd needs IPv6 forwarding enabled (setting 
+/proc/sys/net/ipv6/conf/all/forwarding to 1) so this is done in the init 
+script.
+
+If staring radvd fails, please have a look at /var/log/syslog, since radvd 
+doesn't output startup failures to the terminal.
