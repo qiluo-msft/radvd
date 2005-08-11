@@ -1,3 +1,13 @@
+radvd (1:0.8-1) unstable; urgency=low
+
+  * New upstream release.
+    - Fixes adress garbling issue (closes: #301543).
+  * Bumped standards-version to 3.6.2.
+  * Added missing adduser dependency (thanks, lintian!).
+  * Make download URL version independendent in copyright.
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 11 Aug 2005 20:59:53 +0200
+
 radvd (1:0.7.3-1) unstable; urgency=low
 
   * New upstream release.

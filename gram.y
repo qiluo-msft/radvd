@@ -1,5 +1,5 @@
 /*
- *   $Id: gram.y,v 1.9 2004/10/26 05:30:34 psavola Exp $
+ *   $Id: gram.y,v 1.11 2005/07/05 07:07:45 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -126,7 +126,6 @@ ifacedef	: ifacehead '{' ifaceparams  '}' ';'
 				{
 					flog(LOG_ERR, "duplicate interface "
 						"definition for %s", iface->Name);
-
 					ABORT;
 				}
 				iface2 = iface2->next;
@@ -137,8 +136,10 @@ ifacedef	: ifacehead '{' ifaceparams  '}' ';'
 					dlog(LOG_DEBUG, 4, "interface %s did not exist, ignoring the interface", iface->Name);
 					goto skip_interface;
 				}
-				else
+				else {
+					flog(LOG_ERR, "interface %s does not exist", iface->Name);
 					ABORT;
+				}
 			}
 			if (setup_deviceinfo(sock, iface) < 0)
 				ABORT;
@@ -339,7 +340,7 @@ prefixdef	: prefixhead '{' optional_prefixplist '}' ';'
 					prefix->enabled = 0;
 				} else
 				{
-					*((uint32_t *)(prefix->Prefix.s6_addr)) = htons(0x2002);
+					*((uint16_t *)(prefix->Prefix.s6_addr)) = htons(0x2002);
 					memcpy( prefix->Prefix.s6_addr + 2, &dst, sizeof( dst ) );
 				}
 			}

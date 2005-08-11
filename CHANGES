@@ -1,4 +1,23 @@
-$Id: CHANGES,v 1.36 2005/02/19 18:57:54 lutchann Exp $
+$Id: CHANGES,v 1.42 2005/07/08 11:50:32 psavola Exp $
+
+07/08/2005	Release 0.8.
+
+07/05/2005	Change the more-specific route ND option code
+		from de-facto '9' to the official '24'.  Change
+		back in defaults.h if you need old behaviour.
+
+07/05/2005	Fix wrongly calculated prefix with Base6to4Interface
+                on ppc and maybe other big endian arches, from
+		Debian #301543 by Sam Hathaway.
+
+07/05/2005	Fix Linux-2.6.12-bk4+ error with HUP signal,
+		from YOSHIFUJI Hideaki / USAGI.
+
+03/29/2005	Merge a part of MIPv6/non-MIPv6 code, make printing
+		error messages nicer.
+
+03/22/2005	Be a bit more informative about config file parsing
+		errors.
 
 02/21/2005	Release 0.7.3.
 
