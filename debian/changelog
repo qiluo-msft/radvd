@@ -1,3 +1,12 @@
+radvd (1:1.0-1) unstable; urgency=low
+
+  * New upstream release (closes: #396441).
+  * Removed patch 01-linux-2.6.patch, as it is integrated upstream.
+  * Bumped standards-version to 3.7.2 (no changes).
+  * Added "INIT INFO" block to initscript.
+
+ -- Andreas Rottmann <rotty@debian.org>  Wed,  1 Nov 2006 16:47:28 +0100
+
 radvd (1:0.8-1) unstable; urgency=low
 
   * New upstream release.

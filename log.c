@@ -1,5 +1,5 @@
 /*
- *	$Id: log.c,v 1.4 2004/02/05 18:44:00 lutchann Exp $
+ *	$Id: log.c,v 1.8 2006/10/09 06:15:32 psavola Exp $
  *
  *	Authors:
  *	 Lars Fenneberg		<lf@elemental.net>	 
@@ -9,7 +9,7 @@
  *
  *	The license which is distributed with this software in the file
  *	COPYRIGHT applies to this software. If your distribution is missing 
- *	this file, you may request it from <lutchann@litech.org>.
+ *	this file, you may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -34,6 +34,8 @@ log_open(int method, char *ident, char *log, int facility)
 		case L_NONE:
 		case L_STDERR:
 			break;
+		case L_STDERR_SYSLOG:
+			/* fallthrough */
 		case L_SYSLOG:
 			if (facility == -1)
 				log_facility = LOG_DAEMON;
@@ -77,6 +79,11 @@ vlog(int prio, char *format, va_list ap)
 	    		vsnprintf(buff, sizeof(buff), format, ap);
 			syslog(prio, "%s", buff);
 			break;
+		case L_STDERR_SYSLOG:
+	    		vsnprintf(buff, sizeof(buff), format, ap);
+			syslog(prio, "%s", buff);
+			if (prio > LOG_ERR) /* fall through for messages with high priority */
+				break;
 		case L_STDERR:
 			current = time(NULL);
 			tm = localtime(&current);
@@ -105,23 +112,23 @@ vlog(int prio, char *format, va_list ap)
 	return 0;
 }
 
-int
+void
 dlog(int prio, int level, char *format, ...)
 {
 	va_list ap;
 	int res;
 
 	if (debug_level < level)
-		return 0;
+		return;
 	
 	va_start(ap, format);
 	res = vlog(prio, format, ap);
 	va_end(ap);		
-	
-	return res;
+
+	/* XXX: should we do something if res < 0.. */
 }
 
-int
+void
 flog(int prio, char *format, ...)
 {
 	va_list ap;
@@ -130,8 +137,8 @@ flog(int prio, char *format, ...)
 	va_start(ap, format);
 	res = vlog(prio, format, ap);
 	va_end(ap);		
-	
-	return res;
+
+	/* XXX: should we do something if res < 0.. */
 }
 
 int

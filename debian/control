@@ -2,7 +2,7 @@ Source: radvd
 Section: net
 Priority: optional
 Maintainer: Andreas Rottmann <rotty@debian.org>
-Standards-Version: 3.6.2
+Standards-Version: 3.7.2
 Build-Depends: autotools-dev, debhelper (>= 4.1.0), cdbs, flex, bison
 
 Package: radvd
