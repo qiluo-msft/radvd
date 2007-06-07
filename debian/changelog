@@ -1,3 +1,12 @@
+radvd (1:1.0-2) unstable; urgency=low
+
+  * Don't enable forwarding in the initscript, as suggested by Marco
+    d'Itri; this should be done via /etc/sysctl.conf (closes: #413669).
+  * README.Debian updated to reflect this.
+  * simple-radvd.conf: Fix netmask (/64 instead of /32).
+
+ -- Andreas Rottmann <rotty@debian.org>  Thu, 07 Jun 2007 18:34:48 +0200
+
 radvd (1:1.0-1) unstable; urgency=low
 
   * New upstream release (closes: #396441).

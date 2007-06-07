@@ -14,7 +14,6 @@ DAEMON=/usr/sbin/radvd
 NAME=radvd
 DESC=radvd
 CONFIG=/etc/radvd.conf
-SAVED_SETTINGS=/var/run/radvd/saved-settings
 PIDFILE=/var/run/radvd/radvd.pid
 OPTIONS="-u radvd -p $PIDFILE"
 
@@ -28,42 +27,12 @@ if test \! -e /proc/sys/net/ipv6; then
   exit
 fi
 
-save_settings()
-{
-    local file=$1
-    
-    rm -f $file
-    for if_conf in /proc/sys/net/ipv6/conf/*; do
-	echo -e "$if_conf/forwarding\t `cat $if_conf/forwarding`" >> $file
-    done
-    return 0
-}
-
-restore_settings()
-{
-    file=$1
-    
-    if [ ! -f $file ]; then
-	echo "$0: warning: cannot restore settings"
-	return
-    fi
-    
-    ( 
-	while read f value; do
-	    if [ -w $f ]; then
-		echo $value > $f
-	    fi
-	done
-    ) < $file
-}
-
 chkconfig() {
     if [ ! -e $CONFIG -o ! -s $CONFIG ]; then
         echo ""
 	echo "* $CONFIG does not exist or is empty." 
-	echo "* See /usr/share/doc/radvd/examples/simple-radvd.conf for a simple"
-	echo "* configuration suitable for most systems, and radvd.conf(5)"
-	echo "* for configuration file syntax. radvd will *not* be started."
+	echo "* See /usr/share/doc/radvd/README.Debian"
+	echo "* radvd will *not* be started."
 	exit 0
     fi
 }
@@ -72,7 +41,6 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	chkconfig
-	save_settings $SAVED_SETTINGS
 	
         # We must enable IPv6 forwarding for radvd to work
 	echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
@@ -91,8 +59,6 @@ case "$1" in
 	echo -n "Stopping $DESC: "
 	start-stop-daemon --oknodo --stop --pidfile $PIDFILE \
 		--exec $DAEMON
-	restore_settings $SAVED_SETTINGS
-	rm -f $SAVED_SETTINGS
 	echo "$NAME."
 	;;
   reload|force-reload)
@@ -103,12 +69,8 @@ case "$1" in
   restart)
 	chkconfig
 	echo -n "Restarting $DESC: "
-	if ! start-stop-daemon --stop --quiet --pidfile \
-		$PIDFILE --exec $DAEMON; then
-	  # stop failed, so we were not running
-	  save_settings $SAVED_SETTINGS
-	  echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
-	fi
+	start-stop-daemon --stop --quiet --pidfile \
+		$PIDFILE --exec $DAEMON
 	sleep 1
 	start-stop-daemon --start --quiet --pidfile \
 		$PIDFILE --exec $DAEMON -- $OPTIONS
