@@ -1,5 +1,5 @@
 .\"
-.\"   $Id: radvd.conf.5.man,v 1.20 2006/06/09 11:46:49 psavola Exp $
+.\"   $Id: radvd.conf.5.man,v 1.23 2008/01/24 10:02:30 psavola Exp $
 .\"
 .\"   Authors:
 .\"    Lars Fenneberg		<lf@elemental.net>
@@ -14,7 +14,7 @@
 .\"
 .\"
 .\"
-.TH RADVD.CONF 5 "20 Aug 2004" "radvd @VERSION@" ""
+.TH RADVD.CONF 5 "24 Jan 2008" "radvd @VERSION@" ""
 .SH NAME
 radvd.conf \- configuration file of the router advertisement daemon
 .B radvd
@@ -22,7 +22,8 @@ radvd.conf \- configuration file of the router advertisement daemon
 This file describes the information which is included in the router
 advertisement (RA) of a specific interface.
 .P
-The file contains one or more interface definitions of the form:
+The file contains one or more interface definitions of the form
+(NOTE: the prefix/route/RDNSS definitions must be in this order):
 
 .nf
 .BR "interface " "name " {
@@ -47,6 +48,14 @@ Prefix definitions are of the form:
 Prefix can be network prefix or the address of the inferface.
 The address of interface should be used when using Mobile IPv6
 extensions.
+
+Special prefix "::/64" is also supported on systems that implement getifaddrs()
+(on other systems, configuration activation fails and radvd exits).
+When configured, radvd
+picks one non-link-local prefix assigned to the interface and starts advertising
+it.  This may be applicable in non-6to4 scenarios where the upstream prefix might
+change.  This option is incompatible with Base6to4Interface option.
+AdvRouterAddr option is always enabled when this configuration is used.
 
 All the possible prefix specific options are described below.  Each
 option has to be terminated by a semicolon.
@@ -445,12 +454,16 @@ Default: medium
 The preference of the DNS server, compared to other DNS servers advertised and used.
 0 to 7 means less important than manually configured nameservers in resolv.conf, while 12 to 15 means more important.
 
+NOTE: This feature was removed from the final RFC but can still be used for experimental purposes.
+
 Default: 8
 
 .TP
 .BR "AdvRDNSSOpen " on | off;
 
 "Service Open" flag. When set, indicates that RDNSS continues to be available to hosts even if they moved to a different subnet.
+
+NOTE: This feature was removed from the final RFC but can still be used for experimental purposes.
 
 Default: off
 
@@ -583,7 +596,7 @@ Devarapalli, V., Wakikawa, R., Petrescu, A., and P. Thubert "Network Mobility (N
 RFC 3963, January 2005.
 .PP
 J. Jeong, L. Beloeil, and S. Madanapalli, "IPv6 Router Advertisement Option for DNS Configuration",
-IETF Draft v08 (January 18, 2006).
+RFC 5006, September 2007.
 
 .SH "SEE ALSO"
 

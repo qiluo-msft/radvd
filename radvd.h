@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.h,v 1.24 2006/10/08 19:01:17 psavola Exp $
+ *   $Id: radvd.h,v 1.27 2008/01/24 10:10:18 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -45,6 +45,7 @@ struct timer_lst {
 struct AdvPrefix;
 
 #define HWADDR_MAX 16
+#define USER_HZ 100
 
 struct Interface {
 	char			Name[IFNAMSIZ];	/* interface name */
@@ -110,9 +111,10 @@ struct AdvPrefix {
 	/* Mobile IPv6 extensions */
 	int             	AdvRouterAddr;
 
-	/* 6to4 extensions */
+	/* 6to4 etc. extensions */
 	char			if6to4[IFNAMSIZ];
 	int			enabled;
+	int			AutoSelected;
 
 	struct AdvPrefix	*next;
 };
@@ -191,6 +193,7 @@ int setup_linklocal_addr(int, struct Interface *);
 int setup_allrouters_membership(int, struct Interface *);
 int check_allrouters_membership(int, struct Interface *);
 int get_v4addr(const char *, unsigned int *);
+int set_interface_var(const char *, const char *, const char *, uint32_t);
 int set_interface_linkmtu(const char *, uint32_t);
 int set_interface_curhlim(const char *, uint8_t);
 int set_interface_reachtime(const char *, uint32_t);
@@ -221,5 +224,15 @@ void mdelay(double);
 double rand_between(double, double);
 void print_addr(struct in6_addr *, char *);
 int check_rdnss_presence(struct AdvRDNSS *, struct in6_addr *);
+ssize_t readn(int fd, void *buf, size_t count);
+ssize_t writen(int fd, const void *buf, size_t count);
+
+/* privsep.c */
+int privsep_init(void);
+int privsep_enabled(void);
+int privsep_interface_linkmtu(const char *iface, uint32_t mtu);
+int privsep_interface_curhlim(const char *iface, uint32_t hlim);
+int privsep_interface_reachtime(const char *iface, uint32_t rtime);
+int privsep_interface_retranstimer(const char *iface, uint32_t rettimer);
 
 #endif

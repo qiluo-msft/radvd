@@ -1,5 +1,5 @@
 /*
- *   $Id: gram.y,v 1.17 2006/10/09 06:20:59 psavola Exp $
+ *   $Id: gram.y,v 1.19 2007/10/25 19:29:40 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -326,14 +326,10 @@ ifaceval	: T_MinRtrAdvInterval NUMBER ';'
 		}
 		;
 		
-prefixlist	: prefixdef
+prefixlist	: prefixdef optional_prefixlist
 		{
+			$1->next = $2;
 			$$ = $1;
-		}
-		| prefixlist prefixdef
-		{
-			$2->next = $1;
-			$$ = $2;
 		}
 		;
 
@@ -370,6 +366,7 @@ prefixdef	: prefixhead '{' optional_prefixplist '}' ';'
 
 prefixhead	: T_PREFIX IPV6ADDR '/' NUMBER
 		{
+			struct in6_addr zeroaddr;
 			prefix = malloc(sizeof(struct AdvPrefix));
 			
 			if (prefix == NULL) {
@@ -388,6 +385,45 @@ prefixhead	: T_PREFIX IPV6ADDR '/' NUMBER
 			prefix->PrefixLen = $4;
 
 			memcpy(&prefix->Prefix, $2, sizeof(struct in6_addr));
+
+			memset(&zeroaddr, 0, sizeof(zeroaddr));
+			if (!memcmp($2, &zeroaddr, sizeof(struct in6_addr))) {
+#ifndef HAVE_IFADDRS_H
+				flog(LOG_ERR, "invalid all-zeros prefix in %s, line %d", conf_file, num_lines);
+				ABORT;
+#else
+				dlog(LOG_DEBUG, 5, "all-zeros prefix in %s, line %d, parsing..", conf_file, num_lines);
+				struct ifaddrs *ifap, *ifa;
+				if (getifaddrs(&ifap) != 0)
+					flog(LOG_ERR, "getifaddrs failed: %s", strerror(errno));
+			        for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+				        struct sockaddr_in6 *s6;
+					char buf[INET6_ADDRSTRLEN];
+					if (strncmp(ifa->ifa_name, iface->Name, IFNAMSIZ))
+						continue;
+                			if (ifa->ifa_addr->sa_family != AF_INET6)
+			                        continue;
+					s6 = (struct sockaddr_in6 *)(ifa->ifa_addr);
+	                		if (IN6_IS_ADDR_LINKLOCAL(&s6->sin6_addr))
+						continue;
+					if (inet_ntop(ifa->ifa_addr->sa_family, (void *)&(s6->sin6_addr), buf, sizeof(buf)) == NULL) {
+						flog(LOG_ERR, "%s: inet_ntop failed in %s, line %d!", ifa->ifa_name, conf_file, num_lines);
+					}
+					else {
+						dlog(LOG_DEBUG, 5, "auto-selected prefix %s on interface %s", buf, ifa->ifa_name);
+						memcpy(&prefix->Prefix, &s6->sin6_addr, sizeof(struct in6_addr));
+						prefix->AdvRouterAddr=1;
+						prefix->AutoSelected=1;
+					}
+				}
+				if (!memcmp(&prefix->Prefix, &zeroaddr, sizeof(struct in6_addr))) {
+					prefix->enabled = 0;
+					flog(LOG_WARNING, "no auto-selected prefix on interface %s, disabling advertisements",  iface->Name);
+				}
+				freeifaddrs(ifap);
+				freeifaddrs(ifa);
+#endif /* ifndef HAVE_IFADDRS_H */
+			}
 		}
 		;
 
@@ -409,7 +445,10 @@ prefixparms	: T_AdvOnLink SWITCH ';'
 		}
 		| T_AdvRouterAddr SWITCH ';'
 		{
-			prefix->AdvRouterAddr = $2;
+			if (prefix->AutoSelected && $2 == 0)
+				flog(LOG_WARNING, "prefix automatically selected, AdvRouterAddr always enabled, ignoring config line %d", num_lines);
+			else  
+				prefix->AdvRouterAddr = $2;
 		}
 		| T_AdvValidLifetime number_or_infinity ';'
 		{
@@ -421,20 +460,20 @@ prefixparms	: T_AdvOnLink SWITCH ';'
 		}
 		| T_Base6to4Interface name ';'
 		{
+			if (prefix->AutoSelected) {
+				flog(LOG_ERR, "automatically selecting the prefix and Base6to4Interface are mutually exclusive");
+				ABORT;
+			} /* fallthrough */
 			dlog(LOG_DEBUG, 4, "using interface %s for 6to4", $2);
 			strncpy(prefix->if6to4, $2, IFNAMSIZ-1);
 			prefix->if6to4[IFNAMSIZ-1] = '\0';
 		}
 		;
 
-routelist	: routedef
+routelist	: routedef optional_routelist
 		{
+			$1->next = $2;
 			$$ = $1;
-		}
-		| routelist routedef
-		{
-			$2->next = $1;
-			$$ = $2;
 		}
 		;
 
@@ -489,14 +528,10 @@ routeparms	: T_AdvRoutePreference SIGNEDNUMBER ';'
 		}
 		;
 		
-rdnsslist	: rdnssdef
+rdnsslist	: rdnssdef optional_rdnsslist
 		{
+			$1->next = $2;
 			$$ = $1;
-		}
-		| rdnsslist rdnssdef
-		{
-			$2->next = $1;
-			$$ = $2;
 		}
 		;
 		

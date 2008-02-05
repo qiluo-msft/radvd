@@ -1,3 +1,16 @@
+radvd (1:1.1-1) experimental; urgency=low
+
+  * New upstream release
+    - Closes: #409600
+    - Closes: #428862
+    - Closes: #429874
+    - Closes: #431665
+  * New Maintainer. (Closes: #427965)
+  * Updated initscript restart option (Closes: #461837)
+  * Removed forwarding in initscript (Closes:413669)
+
+ -- Ghe Rivero <ghe@debian.org>  Tue,  5 Feb 2008 13:15:17 +0100
+
 radvd (1:1.0-2) unstable; urgency=low
 
   * Don't enable forwarding in the initscript, as suggested by Marco

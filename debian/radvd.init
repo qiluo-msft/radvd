@@ -43,7 +43,7 @@ case "$1" in
 	chkconfig
 	
         # We must enable IPv6 forwarding for radvd to work
-	echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+	#echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 
 	# Check for stale pidfile; radvd won't start if one is lying around
 	if [ -f $PIDFILE ] && ! ps `cat  $PIDFILE` > /dev/null; then
@@ -67,14 +67,16 @@ case "$1" in
 	    $PIDFILE --exec $DAEMON
 	;;
   restart)
-	chkconfig
-	echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --quiet --pidfile \
-		$PIDFILE --exec $DAEMON
-	sleep 1
-	start-stop-daemon --start --quiet --pidfile \
-		$PIDFILE --exec $DAEMON -- $OPTIONS
-	echo "$NAME."
+	#chkconfig
+	#echo -n "Restarting $DESC: "
+	#start-stop-daemon --stop --quiet --pidfile \
+	#	$PIDFILE --exec $DAEMON
+	#sleep 1
+	#start-stop-daemon --start --quiet --pidfile \
+	#	$PIDFILE --exec $DAEMON -- $OPTIONS
+	#echo "$NAME."
+	/etc/init.d/$NAME stop
+	/etc/init.d/$NAME start
 	;;
   *)
 	N=/etc/init.d/$NAME
