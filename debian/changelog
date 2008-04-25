@@ -1,3 +1,9 @@
+radvd (1:1.1-2) unstable; urgency=low
+
+  * Migrated to unstable
+
+ -- Ghe Rivero <ghe@debian.org>  Fri, 25 Apr 2008 09:37:13 +0200
+
 radvd (1:1.1-1) experimental; urgency=low
 
   * New upstream release
@@ -7,9 +13,9 @@ radvd (1:1.1-1) experimental; urgency=low
     - Closes: #431665
   * New Maintainer. (Closes: #427965)
   * Updated initscript restart option (Closes: #461837)
-  * Removed forwarding in initscript (Closes:413669)
+  * Removed forwarding in initscript (Closes: #413669)
 
- -- Ghe Rivero <ghe@debian.org>  Tue,  5 Feb 2008 13:15:17 +0100
+ -- Ghe Rivero <ghe@debian.org>  Wed,  6 Feb 2008 23:22:22 +0100
 
 radvd (1:1.0-2) unstable; urgency=low
 
