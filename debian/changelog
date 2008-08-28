@@ -1,3 +1,13 @@
+radvd (1:1.1-2.1) unstable; urgency=low
+
+  * Non-maintainer upload for the alpha port, with maintainer's approval.
+  * Fix the alignment of the "chdr" buffer in send.c, so that we stop getting
+    unaligned traps that make the process run much less efficiently.  This
+    probably also causes radvd to crash outright on sparc, though this has
+    not been confirmed.  Thanks to Bob Tracy for the patch.  Closes: #456205.
+
+ -- Steve Langasek <vorlon@debian.org>  Thu, 28 Aug 2008 01:19:30 -0700
+
 radvd (1:1.1-2) unstable; urgency=low
 
   * Migrated to unstable
