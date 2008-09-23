@@ -14,8 +14,10 @@ DAEMON=/usr/sbin/radvd
 NAME=radvd
 DESC=radvd
 CONFIG=/etc/radvd.conf
-PIDFILE=/var/run/radvd/radvd.pid
+PIDDIR=/var/run/radvd
+PIDFILE=$PIDDIR/radvd.pid
 OPTIONS="-u radvd -p $PIDFILE"
+PROC_SYS_IP6_FORWARDING=/proc/sys/net/ipv6/conf/all/forwarding
 
 test -x $DAEMON || exit 0
 
@@ -34,6 +36,13 @@ chkconfig() {
 	echo "* See /usr/share/doc/radvd/README.Debian"
 	echo "* radvd will *not* be started."
 	exit 0
+    elif [ ! -e $PROC_SYS_IP6_FORWARDING -o \
+	"$(cat $PROC_SYS_IP6_FORWARDING)" = "0" ]; then
+        echo ""
+	echo "* IPv6 forwarding seems to be disabled."
+	echo "* See /usr/share/doc/radvd/README.Debian"
+	echo "* radvd will *not* be started."
+	exit 0
     fi
 }
 
@@ -43,7 +52,10 @@ case "$1" in
 	chkconfig
 	
         # We must enable IPv6 forwarding for radvd to work
-	#echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+	# echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+
+	# Anything under /var/run can go away on reboot
+	[ -e $PIDDIR ] || install -d -o radvd -g root -m 4755 $PIDDIR
 
 	# Check for stale pidfile; radvd won't start if one is lying around
 	if [ -f $PIDFILE ] && ! ps `cat  $PIDFILE` > /dev/null; then
