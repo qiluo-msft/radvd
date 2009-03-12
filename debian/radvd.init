@@ -87,8 +87,8 @@ case "$1" in
 	#start-stop-daemon --start --quiet --pidfile \
 	#	$PIDFILE --exec $DAEMON -- $OPTIONS
 	#echo "$NAME."
-	/etc/init.d/$NAME stop
-	/etc/init.d/$NAME start
+	invoke-rc.d $NAME stop
+	nvoke-rc.d $NAME start
 	;;
   *)
 	N=/etc/init.d/$NAME

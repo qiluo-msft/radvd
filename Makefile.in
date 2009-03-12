@@ -15,7 +15,7 @@
 @SET_MAKE@
 
 #
-#   $Id: Makefile.am,v 1.5 2008/01/24 10:03:17 psavola Exp $
+#   $Id: Makefile.am,v 1.6 2008/10/14 14:03:29 psavola Exp $
 #
 #   Authors:
 #    Lars Fenneberg		<lf@elemental.net>	 
@@ -120,7 +120,7 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CFLAGS = @CFLAGS@ -Wall -Wpointer-arith  -Wcast-qual -Wcast-align -Wconversion \
+CFLAGS = @CFLAGS@ -Wall -Wpointer-arith  -Wcast-qual -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
 
 CPP = @CPP@

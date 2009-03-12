@@ -2,12 +2,12 @@ Source: radvd
 Section: net
 Priority: optional
 Maintainer: Ghe Rivero <ghe@debian.org>
-Standards-Version: 3.7.2
+Standards-Version: 3.8
 Build-Depends: autotools-dev, debhelper (>= 4.1.0), cdbs, flex, bison
 
 Package: radvd
 Architecture: any
-Depends: ${shlibs:Depends}, adduser
+Depends: ${shlibs:Depends}, adduser, ${misc:Depends}
 Description: Router Advertisement Daemon
  IPv6 has a lot more support for autoconfiguration than IPv4. But
  for this autoconfiguration to work on the hosts of a network, the

@@ -1,4 +1,25 @@
-$Id: CHANGES,v 1.71 2008/02/04 06:32:22 psavola Exp $
+$Id: CHANGES,v 1.78 2008/10/28 16:35:43 psavola Exp $
+
+28/10/2008	Release 1.2.
+
+14/10/2008	Accept virtually any interface name (up to 15 chars) instead of
+		forcing a specific naming convention.  Patch from
+		Michiel Brandenburg.
+
+		If stale radvd.pid file exists, try to overwrite it unless
+		the specified PID exists, from Fedora (Martin Nagy).
+
+		Define _GNU_SOURCE on Linux, otherwise glibc >= 2.8
+		compilation fails.
+
+		Remove -Wconversion from default CFLAGS as its very noisy.
+		Fix some warnings, from Jim Paris.
+
+31/03/2008	Update references to RFCs.  Give pointer to the "two hour rule".
+		Decrease the default valid and preferred lifetimes from 30/1
+		days to 1day/4hours, respectively.  See more info at:
+
+		http://lists.litech.org/pipermail/radvd-devel-l/2007-October/000282.html
 
 04/02/2008	Release 1.1.
 
