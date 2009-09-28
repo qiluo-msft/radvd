@@ -14,6 +14,7 @@ pre-build:: debian/copyright
 
 clean::
 	rm -f gram.c gram.h scanner.c
+	rm -f privsep.c
 
 common-install-prehook-arch::
 	install -m 644 debian/simple-radvd.conf `pwd`/debian/radvd/usr/share/doc/radvd/examples/

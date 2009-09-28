@@ -13,4 +13,10 @@ if [ "$1" = configure ]; then
   done
 fi
 
+# Recover from incorrect init.d script headers in version 1:1.3-1 and earlier
+if [ "$1" = "configure" ] && dpkg --compare-versions "$2" le "1:1.3-1" \
+   && [ -f /etc/rcS.d/S[0-9][0-9]radvd ] ; then
+  update-rc.d -f radvd remove
+fi
+
 #DEBHELPER#

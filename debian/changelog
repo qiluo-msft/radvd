@@ -1,3 +1,16 @@
+radvd (1:1.3-1.1) unstable; urgency=low
+
+  * Non-maintainer upload to fix release goal.
+  * Source build fine in pbuilder now (Closes: #518878)
+  * Correct runlevels and dependencies in init.d script, and add
+    postinst code to recover systems bit by this bug (Closes: #541874).
+  * Fix typo in init.d script (Closes: #519560).
+  * Update to use debhelper 7.
+  * Remove the privsep.c symlink in the clean target to make sure
+    the source is rebuildable.
+
+ -- Petter Reinholdtsen <pere@debian.org>  Mon, 28 Sep 2009 20:54:12 +0200
+
 radvd (1:1.3-1) unstable; urgency=low
 
   * New upstream release
