@@ -1,0 +1,15 @@
+diff -ur radvd-1.6-old/configure.in radvd-1.6/configure.in
+--- radvd-1.6-old/configure.in	2008-10-14 15:10:11.000000000 +0200
++++ radvd-1.6/configure.in	2011-03-13 19:55:08.000000000 +0100
+@@ -27,6 +27,11 @@
+ 		AC_DEFINE([_GNU_SOURCE], [], [whether compiling on Linux, glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
+                 arch=linux
+         ;;
++	*kfreebsd*gnu*)
++		AC_MSG_RESULT(kfreebsd-gnu)
++		AC_DEFINE([_GNU_SOURCE], [], [glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
++                arch=bsd44
++        ;;
+         *bsd*)
+ 		AC_MSG_RESULT(bsd44)
+                 arch=bsd44

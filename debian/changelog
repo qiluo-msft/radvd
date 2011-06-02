@@ -1,3 +1,17 @@
+radvd (1:1.8-1) unstable; urgency=low
+
+  * New upstream release
+    - Fix segfault in timer handling. (Closes: #611297)
+    - Fix error in DNSSL parsing (Closes: #615625)
+    - Fix no respond on a tunnel interface after peer is reconnected
+        (Closes: #628592)
+  * Bumped Debian Policy Version 3.9.2
+  * Added support for kfreebsd (Closes: #618266)
+  * Remove pid file checking in init script (Closes: #604905)
+  * Some clarifications in README.Debian file (Closes: #601975)
+
+ -- Ghe Rivero <ghe@debian.org>  Thu, 02 Jun 2011 08:20:52 +0200
+
 radvd (1:1.7-1) unstable; urgency=low
 
   * New upstream release

@@ -24,12 +24,15 @@ test -x $DAEMON || exit 0
 set -e
 
 # Check for IPv6 support in kernel
-if test \! -e /proc/sys/net/ipv6; then
-  echo "IPv6 support must be enabled in the kernel for $DESC to work."
-  exit
-fi
+if [ "$(uname -s)" != "GNU/kFreeBSD" ]; then                                                            
+  if test \! -e /proc/sys/net/ipv6; then
+    echo "IPv6 support must be enabled in the kernel for $DESC to work."
+    exit
+  fi
+fi 
 
 chkconfig() {
+  if [ "$(uname -s)" != "GNU/kFreeBSD" ]; then
     if [ ! -e $CONFIG -o ! -s $CONFIG ]; then
         echo ""
 	echo "* $CONFIG does not exist or is empty." 
@@ -44,6 +47,7 @@ chkconfig() {
 	echo "* radvd will *not* be started."
 	exit 0
     fi
+  fi
 }
 
 case "$1" in
@@ -51,16 +55,9 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	chkconfig
 	
-        # We must enable IPv6 forwarding for radvd to work
-	# echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
-
 	# Anything under /var/run can go away on reboot
 	[ -e $PIDDIR ] || install -d -o radvd -g root -m 4755 $PIDDIR
 
-	# Check for stale pidfile; radvd won't start if one is lying around
-	if [ -f $PIDFILE ] && ! ps `cat  $PIDFILE` > /dev/null; then
-	  rm -f $PIDFILE
-	fi
 	if ! start-stop-daemon --oknodo --start --pidfile $PIDFILE \
 		--exec $DAEMON -- $OPTIONS; then
 	  echo "failed." && exit 1
@@ -79,14 +76,6 @@ case "$1" in
 	    $PIDFILE --exec $DAEMON
 	;;
   restart)
-	#chkconfig
-	#echo -n "Restarting $DESC: "
-	#start-stop-daemon --stop --quiet --pidfile \
-	#	$PIDFILE --exec $DAEMON
-	#sleep 1
-	#start-stop-daemon --start --quiet --pidfile \
-	#	$PIDFILE --exec $DAEMON -- $OPTIONS
-	#echo "$NAME."
 	invoke-rc.d $NAME stop
 	invoke-rc.d $NAME start
 	;;
