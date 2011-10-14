@@ -1,3 +1,24 @@
+radvd (1:1.8-1.1) unstable; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * debian/patches: backport patches from upstream to fix various security
+    issues:                                                     closes: #644614
+    - 0001-set_interface_var-doesn-t-check-interface-name-and-b fix arbitrary
+      file overwrite (CVE-2011-3602)
+    - 0002-main-must-fail-on-privsep_init-errors-it-must-not-ru,
+      0003-privsep_read_loop-should-return-on-unprivileged-daem and
+      0004-Really-exit-on-privsep-init-failure fix failure to check return
+      code of privilege dropping function (CVE-2011-3603)
+    - 0005-process_ra-has-numerous-missed-len-checks.-It-leads- fix multiple
+      buffer overreads (CVE-2011-3604)
+    - 0006-removing-mdelay-in-unicast-only-case fix a denial of service
+      (CVE-2011-3605)
+    - 0007-checking-iface-name-more-carefully on top of
+      0001-set_interface_var-doesn-t-check-interface-name-and-b
+      (CVE-2011-3602)
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Fri, 14 Oct 2011 23:28:02 +0200
+
 radvd (1:1.8-1) unstable; urgency=low
 
   * New upstream release
