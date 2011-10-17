@@ -1,3 +1,13 @@
+radvd (1:1.8-1.2) unstable; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * debian/patches:
+    - add 0008-In-process_ra-ND_OPT_DNSSL_INFORMATION-option-parsin,
+      backported from upstream, fix a buffer overflow leading to privilege
+      escalation (CVE-2011-3601).
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Mon, 17 Oct 2011 18:24:08 +0200
+
 radvd (1:1.8-1.1) unstable; urgency=high
 
   * Non-maintainer upload by the Security Team.
