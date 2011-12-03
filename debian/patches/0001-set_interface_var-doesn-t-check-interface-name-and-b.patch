@@ -16,12 +16,12 @@ Subject: [PATCH] set_interface_var() doesn't check interface name and blindly
  device-linux.c |    4 ++++
  1 files changed, 4 insertions(+), 0 deletions(-)
 
-diff --git a/device-linux.c b/device-linux.c
-index 3bb0beb..709eebc 100644
---- a/device-linux.c
-+++ b/device-linux.c
-@@ -243,6 +243,10 @@ set_interface_var(const char *iface,
- 	if (snprintf(spath, sizeof(spath), var, iface) >= sizeof(spath))
+Index: radvd-1.8.3/device-linux.c
+===================================================================
+--- radvd-1.8.3.orig/device-linux.c	2011-12-03 14:42:46.000000000 +0100
++++ radvd-1.8.3/device-linux.c	2011-12-03 14:42:54.000000000 +0100
+@@ -247,6 +247,10 @@
+ 	if (!iface[0] || !strcmp(iface, ".") || !strcmp(iface, "..") || strchr(iface, '/'))
  		return -1;
  
 +	/* No path traversal */
@@ -31,6 +31,3 @@ index 3bb0beb..709eebc 100644
  	if (access(spath, F_OK) != 0)
  		return -1;
  
--- 
-1.7.6.3
-

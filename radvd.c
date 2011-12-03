@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.c,v 1.61 2011/05/04 17:22:57 reubenhwk Exp $
+ *   $Id: radvd.c,v 1.62 2011/06/07 04:53:42 reubenhwk Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -270,8 +270,10 @@ main(int argc, char *argv[])
 	if (username) {
 		if (!singleprocess) {
 		 	dlog(LOG_DEBUG, 3, "Initializing privsep");
-		 	if (privsep_init() < 0)
-				flog(LOG_WARNING, "Failed to initialize privsep.");
+			if (privsep_init() < 0) {
+				perror("Failed to initialize privsep.");
+				exit(1);
+			}
 		}
 
 		if (drop_root_privileges(username) < 0) {
@@ -397,7 +399,7 @@ void main_loop(void)
 			}
 		}
 
-		dlog(LOG_DEBUG, 3, "polling for %g seconds.", timeout/1000.0);
+		dlog(LOG_DEBUG, 5, "polling for %g seconds.", timeout/1000.0);
 
 		rc = poll(fds, sizeof(fds)/sizeof(fds[0]), timeout);
 
@@ -638,8 +640,6 @@ sighup_handler(int sig)
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGHUP, sighup_handler);
 
-	dlog(LOG_DEBUG, 4, "sighup_handler called");
-
 	sighup_received = 1;
 }
 
@@ -649,12 +649,9 @@ sigterm_handler(int sig)
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGTERM, sigterm_handler);
 
-	dlog(LOG_DEBUG, 4, "sigterm_handler called");
-
 	++sigterm_received;
 
 	if(sigterm_received > 1){
-		dlog(LOG_ERR, 1, "sigterm_handler called %d times...aborting...", sigterm_received);
 		abort();
 	}
 }
@@ -665,12 +662,9 @@ sigint_handler(int sig)
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGINT, sigint_handler);
 
-	dlog(LOG_DEBUG, 4, "sigint_handler called");
-
 	++sigint_received;
 
 	if(sigint_received > 1){
-		dlog(LOG_ERR, 1, "sigint_handler called %d times...aborting...", sigint_received);
 		abort();
 	}
 }
@@ -712,10 +706,7 @@ void sigusr1_handler(int sig)
 	/* Linux has "one-shot" signals, reinstall the signal handler */
 	signal(SIGUSR1, sigusr1_handler);
 
-	dlog(LOG_DEBUG, 4, "sigusr1_handler called");
-
 	sigusr1_received = 1;
-
 }
 
 int

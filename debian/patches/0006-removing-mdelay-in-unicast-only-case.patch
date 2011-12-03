@@ -7,15 +7,17 @@ Subject: [PATCH] removing mdelay in unicast only case
  process.c |    1 -
  1 files changed, 0 insertions(+), 1 deletions(-)
 
-Index: radvd-1.8/process.c
+Index: radvd-1.8.3/process.c
 ===================================================================
---- radvd-1.8.orig/process.c	2011-10-14 23:17:31.000000000 +0200
-+++ radvd-1.8/process.c	2011-10-14 23:17:51.659622373 +0200
-@@ -195,7 +195,6 @@
+--- radvd-1.8.3.orig/process.c	2011-10-06 17:32:36.000000000 +0200
++++ radvd-1.8.3/process.c	2011-12-03 17:35:10.000000000 +0100
+@@ -194,7 +194,8 @@
+ 	delay = MAX_RA_DELAY_TIME * rand() / (RAND_MAX +1.0);
  
  	if (iface->UnicastOnly) {
- 		dlog(LOG_DEBUG, 3, "random mdelay for %s: %g seconds.", iface->Name, delay/1000.0);
--		mdelay(delay);
- 		send_ra_forall(iface, &addr->sin6_addr);
+-		send_ra_forall(iface, &addr->sin6_addr);
++	        mdelay(delay);
++	        send_ra_forall(iface, &addr->sin6_addr);
  	}
  	else if ( timevaldiff(&tv, &iface->last_multicast) / 1000.0 < iface->MinDelayBetweenRAs ) {
+ 		/* last RA was sent only a few moments ago, don't send another immediately. */
