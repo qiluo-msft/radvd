@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 
 %:
-	dh $@ --with quilt
+	dh $@
 
-override_dh_autobuild: 
+override_dh_autobuild:
 	cp debian/copyright.in > COPYRIGHT
 
 override_dh_autoclean:

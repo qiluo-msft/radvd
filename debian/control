@@ -15,6 +15,6 @@ Description: Router Advertisement Daemon
  the autoconfiguration requests of the hosts.
  .
  On Linux this program is called radvd, which stands for Router
- ADVertisement Daemon. This daemon listens to router solicitations (RS) 
+ ADVertisement Daemon. This daemon listens to router solicitations (RS)
  and answers with router advertisement (RA). Furthermore unsolicited
  RAs are also sent from time to time.

@@ -1,3 +1,11 @@
+radvd (1:1.8.3-2) unstable; urgency=low
+
+  * Added status option for init command. Closes: #651473
+    - Thanks to Casper Gielen
+  * Switch to dpkg-source 3.0 (quilt) format
+
+ -- Ghe Rivero <ghe@debian.org>  Fri, 09 Dec 2011 10:18:38 +0100
+
 radvd (1:1.8.3-1) unstable; urgency=low
 
   * New upstream release
