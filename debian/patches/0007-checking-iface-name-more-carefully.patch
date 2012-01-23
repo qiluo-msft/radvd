@@ -8,11 +8,9 @@ modified:   device-linux.c
  device-linux.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-Index: radvd-1.8.3/device-linux.c
-===================================================================
---- radvd-1.8.3.orig/device-linux.c	2011-12-03 15:01:45.000000000 +0100
-+++ radvd-1.8.3/device-linux.c	2011-12-03 17:37:00.000000000 +0100
-@@ -248,7 +248,7 @@
+--- a/device-linux.c
++++ b/device-linux.c
+@@ -247,7 +247,7 @@
  		return -1;
  
  	/* No path traversal */

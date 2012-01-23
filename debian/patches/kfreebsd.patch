@@ -1,16 +1,15 @@
-Index: radvd-1.8.3/configure.in
-===================================================================
---- radvd-1.8.3.orig/configure.in	2011-10-06 12:52:20.000000000 +0200
-+++ radvd-1.8.3/configure.in	2011-12-03 17:43:00.000000000 +0100
-@@ -28,6 +28,11 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -26,6 +26,12 @@
  		AC_DEFINE([_GNU_SOURCE], [], [whether compiling on Linux, glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
                  arch=linux
          ;;
-+	*kfreebsd*gnu*)
-+		AC_MSG_RESULT(kfreebsd-gnu)
-+		AC_DEFINE([_GNU_SOURCE], [], [glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
++        *kfreebsd*gnu*)
++                AC_MSG_RESULT(kfreebsd-gnu)
++                AC_DEFINE([_GNU_SOURCE], [], [glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
 +                arch=bsd44
 +        ;;
++
          *bsd*)
  		AC_MSG_RESULT(bsd44)
                  arch=bsd44

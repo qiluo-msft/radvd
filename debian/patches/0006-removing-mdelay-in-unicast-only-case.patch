@@ -7,11 +7,9 @@ Subject: [PATCH] removing mdelay in unicast only case
  process.c |    1 -
  1 files changed, 0 insertions(+), 1 deletions(-)
 
-Index: radvd-1.8.3/process.c
-===================================================================
---- radvd-1.8.3.orig/process.c	2011-10-06 17:32:36.000000000 +0200
-+++ radvd-1.8.3/process.c	2011-12-03 17:35:10.000000000 +0100
-@@ -194,7 +194,8 @@
+--- a/process.c
++++ b/process.c
+@@ -193,7 +193,8 @@
  	delay = MAX_RA_DELAY_TIME * rand() / (RAND_MAX +1.0);
  
  	if (iface->UnicastOnly) {
