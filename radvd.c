@@ -285,8 +285,6 @@ main(int argc, char *argv[])
 		}
 	}
 
-	write_pid_file(pidfile);
-
 	/*
 	 * okay, config file is read in, socket and stuff is setup, so
 	 * lets fork now...
@@ -300,6 +298,8 @@ main(int argc, char *argv[])
 				perror("daemon");
 		}
 	}
+
+	write_pid_file(pidfile);
 
 	/*
 	 *	config signal handlers
@@ -445,7 +445,7 @@ void main_loop(void)
 				timer_handler(next);
 		}
 		else if ( rc == -1 ) {
-			flog(LOG_ERR, "poll error: %s", strerror(errno));
+			dlog(LOG_INFO, 3, "poll returned early: %s", strerror(errno));
 		}
 
 		if (sigterm_received || sigint_received) {
@@ -455,12 +455,14 @@ void main_loop(void)
 
 		if (sighup_received)
 		{
+			dlog(LOG_INFO, 3, "sig hup received.\n");
 			reload_config();
 			sighup_received = 0;
 		}
 
 		if (sigusr1_received)
 		{
+			dlog(LOG_INFO, 3, "sig usr1 received.\n");
 			reset_prefix_lifetimes();
 			sigusr1_received = 0;
 		}
