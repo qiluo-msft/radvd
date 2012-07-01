@@ -1,3 +1,11 @@
+radvd (1:1.9.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Added pkg-config, libdaemon-dev as build-depend
+  * DNSSL options are concatenated if specified with trailing. Closes: #634485
+
+ -- Ghe Rivero <ghe@debian.org>  Sun, 01 Jul 2012 10:51:22 +0200
+
 radvd (1:1.8.5-1) unstable; urgency=low
 
   * New upstream release

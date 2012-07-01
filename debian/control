@@ -2,8 +2,10 @@ Source: radvd
 Section: net
 Priority: optional
 Maintainer: Ghe Rivero <ghe@debian.org>
-Standards-Version: 3.9.2
-Build-Depends: autotools-dev, debhelper (>= 7), cdbs, flex, bison
+Standards-Version: 3.9.3
+Build-Depends: autotools-dev, debhelper (>= 7.0.50~), flex, bison,
+ pkg-config,
+ libdaemon-dev
 
 Package: radvd
 Architecture: any
