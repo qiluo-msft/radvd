@@ -1,3 +1,10 @@
+radvd (1:1.9.1-1.1) unstable; urgency=low
+
+  * Non-maintainer upload with maintainer approval.
+  * Apply patch to enable hardening build flags (Closes: #665715).
+
+ -- Thijs Kinkhorst <thijs@debian.org>  Fri, 07 Jun 2013 11:04:30 +0200
+
 radvd (1:1.9.1-1) unstable; urgency=low
 
   * New upstream release
