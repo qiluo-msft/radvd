@@ -1,3 +1,9 @@
+radvd (1:1.9.1-1.1+autotool) unreleased; urgency=medium
+
+  * Use --with-autoreconf to fix build on more recent ports
+
+ -- Peter Michael Green <plugwash@debian.org>  Tue, 03 Jun 2014 10:03:54 +0000
+
 radvd (1:1.9.1-1.1) unstable; urgency=low
 
   * Non-maintainer upload with maintainer approval.
