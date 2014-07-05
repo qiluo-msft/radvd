@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Ghe Rivero <ghe@debian.org>
 Standards-Version: 3.9.3
-Build-Depends: autotools-dev, debhelper (>= 9), flex, bison,
+Build-Depends: dh-autoreconf, debhelper (>= 9), flex, bison,
  pkg-config,
  libdaemon-dev
 
