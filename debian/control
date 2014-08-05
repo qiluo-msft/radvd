@@ -6,6 +6,7 @@ Standards-Version: 3.9.3
 Build-Depends: dh-autoreconf, debhelper (>= 9), flex, bison,
  pkg-config,
  libdaemon-dev
+XS-Testsuite: autopkgtest
 
 Package: radvd
 Architecture: any
