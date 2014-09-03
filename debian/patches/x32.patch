@@ -1,0 +1,50 @@
+--- a/configure.ac
++++ b/configure.ac
+@@ -179,7 +179,7 @@ int u =  in6_u.s6_addr16;], [AC_MSG_RESU
+ AC_MSG_RESULT(no))
+ 
+ dnl Checks for library functions.
+-AC_CHECK_FUNCS(getopt_long)
++AC_CHECK_FUNCS([getopt_long sysctl])
+ 
+ CONDITIONAL_SOURCES="device-${arch}.${OBJEXT} ${CONDITIONAL_SOURCES}"
+ if test x${arch} = xlinux ; then
+--- a/includes.h
++++ b/includes.h
+@@ -72,7 +72,9 @@
+ 
+ #include <arpa/inet.h>
+ 
++#ifdef HAVE_SYSCTL
+ #include <sys/sysctl.h>
++#endif
+ 
+ #include <net/if.h>
+ 
+--- a/radvd.c
++++ b/radvd.c
+@@ -763,7 +763,9 @@ check_conffile_perm(const char *username
+ int
+ check_ip6_forwarding(void)
+ {
++#ifdef HAVE_SYSCTL
+ 	int forw_sysctl[] = { SYSCTL_IP6_FORWARDING };
++#endif
+ 	int value;
+ 	size_t size = sizeof(value);
+ 	FILE *fp = NULL;
+@@ -785,8 +787,12 @@ check_ip6_forwarding(void)
+ 	                        "or the kernel interface has changed?");
+ #endif /* __linux__ */
+ 
+-	if (!fp && sysctl(forw_sysctl, sizeof(forw_sysctl)/sizeof(forw_sysctl[0]),
+-	    &value, &size, NULL, 0) < 0) {
++	if (!fp
++#ifdef HAVE_SYSCTL
++	    && sysctl(forw_sysctl, sizeof(forw_sysctl)/sizeof(forw_sysctl[0]),
++	    &value, &size, NULL, 0) < 0
++#endif
++	    ) {
+ 		flog(LOG_DEBUG, "Correct IPv6 forwarding sysctl branch not found, "
+ 			"perhaps the kernel interface has changed?");
+ 		return(0);	/* this is of advisory value only */
