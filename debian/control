@@ -2,10 +2,11 @@ Source: radvd
 Section: net
 Priority: optional
 Maintainer: Ghe Rivero <ghe@debian.org>
-Standards-Version: 3.9.3
+Standards-Version: 3.9.6
 Build-Depends: dh-autoreconf, debhelper (>= 9), flex, bison,
  pkg-config,
- libdaemon-dev
+ libdaemon-dev,
+ check
 XS-Testsuite: autopkgtest
 
 Package: radvd

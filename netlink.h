@@ -9,12 +9,13 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <pekkas@netcore.fi>.
+ *   may request it from <reubenhwk@gmail.com>.
  *
  */
 
 #pragma once
 
-void process_netlink_msg(int sock);
-int netlink_socket(void);
+#include "radvd.h"
 
+void process_netlink_msg(int sock, struct Interface * ifaces);
+int netlink_socket(void);

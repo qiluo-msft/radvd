@@ -9,11 +9,11 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <pekkas@netcore.fi>.
+ *   may request it from <reubenhwk@gmail.com>.
  *
  */
 
-%option nounput noinput noyywrap
+%option nounput noinput noyywrap yylineno
 
 %{
 #include "config.h"
@@ -21,9 +21,8 @@
 #include "log.h"
 #include "gram.h"
 
-extern char *conf_file;
+int num_lines;
 
-int num_lines = 1;
 %}
 
 digit		[0-9]
@@ -49,6 +48,8 @@ route			{ return T_ROUTE; }
 RDNSS			{ return T_RDNSS; }
 DNSSL			{ return T_DNSSL; }
 clients			{ return T_CLIENTS; }
+lowpanco		{ return T_LOWPANCO; }
+abro			{ return T_ABRO; }
 
 IgnoreIfMissing		{ return T_IgnoreIfMissing; }
 AdvSendAdvert		{ return T_AdvSendAdvert; }
@@ -99,11 +100,20 @@ MinDelayBetweenRAs      { return T_MinDelayBetweenRAs; }
 
 AdvMobRtrSupportFlag	{ return T_AdvMobRtrSupportFlag; }
 
+AdvContextLength	{ return T_AdvContextLength; }
+AdvContextCompressionFlag { return T_AdvContextCompressionFlag; }
+AdvContextID		{ return T_AdvContextID; }
+AdvLifeTime		{ return T_AdvLifeTime; }
+AdvContextPrefix	{ return T_AdvContextPrefix; }
+
+AdvVersionLow		{ return T_AdvVersionLow; }
+AdvVersionHigh		{ return T_AdvVersionHigh; }
+AdvValidLifeTime	{ return T_AdvValidLifeTime; }
+Adv6LBRaddress		{ return T_Adv6LBRaddress; }
+
 {addr}		{
 			static struct in6_addr addr;
 			if (inet_pton(AF_INET6, yytext, &addr) < 1) {
-				flog(LOG_ERR, "invalid address in %s, line %d", conf_file,
-					num_lines);
 				return T_BAD_TOKEN;
 			}
 
