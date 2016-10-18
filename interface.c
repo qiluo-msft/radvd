@@ -1,5 +1,5 @@
 /*
- *   $Id: interface.c,v 1.10 2005/03/29 15:15:20 psavola Exp $
+ *   $Id: interface.c,v 1.18 2006/08/24 11:41:39 psavola Exp $
  *
  *   Authors:
  *    Lars Fenneberg		<lf@elemental.net>	 
@@ -9,7 +9,7 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <lutchann@litech.org>.
+ *   may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -23,6 +23,7 @@ iface_init_defaults(struct Interface *iface)
 {
 	memset(iface, 0, sizeof(struct Interface));
 
+	iface->HasFailed	  = 0;
 	iface->IgnoreIfMissing	  = DFLT_IgnoreIfMissing;
 	iface->AdvSendAdvert	  = DFLT_AdvSendAdv;
 	iface->MaxRtrAdvInterval  = DFLT_MaxRtrAdvInterval;
@@ -36,11 +37,12 @@ iface_init_defaults(struct Interface *iface)
 	iface->AdvHomeAgentFlag	  = DFLT_AdvHomeAgentFlag;
 	iface->HomeAgentPreference = DFLT_HomeAgentPreference;
 	iface->MinDelayBetweenRAs   = DFLT_MinDelayBetweenRAs;
+	iface->AdvMobRtrSupportFlag = DFLT_AdvMobRtrSupportFlag;
 
-	iface->MinRtrAdvInterval  = -1;
+	iface->MinRtrAdvInterval = -1;
 	iface->AdvDefaultLifetime = -1;
 	iface->AdvDefaultPreference = DFLT_AdvDefaultPreference;
-	iface->HomeAgentLifetime  = 0;
+	iface->HomeAgentLifetime = -1;
 }
 
 void
@@ -64,6 +66,17 @@ route_init_defaults(struct AdvRoute *route, struct Interface *iface)
 		
 	route->AdvRouteLifetime = DFLT_AdvRouteLifetime(iface);
 	route->AdvRoutePreference = DFLT_AdvRoutePreference;
+}
+
+void
+rdnss_init_defaults(struct AdvRDNSS *rdnss, struct Interface *iface)
+{
+	memset(rdnss, 0, sizeof(struct AdvRDNSS));
+		
+	rdnss->AdvRDNSSPreference = DFLT_AdvRDNSSPreference;
+	rdnss->AdvRDNSSOpenFlag = DFLT_AdvRDNSSOpenFlag;
+	rdnss->AdvRDNSSLifetime = DFLT_AdvRDNSSLifetime(iface);
+	rdnss->AdvRDNSSNumber = 0;
 }
 
 int
@@ -92,7 +105,7 @@ check_iface(struct Interface *iface)
 		prefix = prefix->next;
 	}
 
-	if (iface->MinRtrAdvInterval == -1)
+	if (iface->MinRtrAdvInterval < 0)
 		iface->MinRtrAdvInterval = DFLT_MinRtrAdvInterval(iface);
 
 	if ((iface->MinRtrAdvInterval < (MIPv6 ? MIN_MinRtrAdvInterval_MIPv6 : MIN_MinRtrAdvInterval)) || 
@@ -149,17 +162,9 @@ check_iface(struct Interface *iface)
 			iface->Name, iface->AdvCurHopLimit, MAX_AdvCurHopLimit);
 		res = -1;
 	}
-	
-	if (iface->AdvDefaultLifetime == -1)
-	{
-		iface->AdvDefaultLifetime = DFLT_AdvDefaultLifetime(iface);
-	}
 
-	/* Mobile IPv6 ext */
-	if (iface->HomeAgentLifetime == 0)
-	{
-		iface->HomeAgentLifetime = DFLT_HomeAgentLifetime(iface);
-	}
+	if (iface->AdvDefaultLifetime < 0)
+		iface->AdvDefaultLifetime = DFLT_AdvDefaultLifetime(iface);
 
 	if ((iface->AdvDefaultLifetime != 0) &&
 	   ((iface->AdvDefaultLifetime > MAX_AdvDefaultLifetime) ||
@@ -167,10 +172,14 @@ check_iface(struct Interface *iface)
 	{
 		flog(LOG_ERR, 
 			"AdvDefaultLifetime for %s (%u) must be zero or between %u and %u",
-			iface->Name, iface->AdvDefaultLifetime, MIN_AdvDefaultLifetime(iface),
+			iface->Name, iface->AdvDefaultLifetime, (int)MIN_AdvDefaultLifetime(iface),
 			MAX_AdvDefaultLifetime);
 		res = -1;
 	}
+
+	/* Mobile IPv6 ext */
+	if (iface->HomeAgentLifetime < 0)
+		iface->HomeAgentLifetime = DFLT_HomeAgentLifetime(iface);
 
 	/* Mobile IPv6 ext */
 	if (iface->AdvHomeAgentInfo)
@@ -191,6 +200,12 @@ check_iface(struct Interface *iface)
 	{
 		flog(LOG_ERR, 
 			"AdvHomeAgentFlag for %s must be set with HomeAgentInfo", iface->Name);
+		res = -1;
+	}
+	if (iface->AdvMobRtrSupportFlag && !(iface->AdvHomeAgentInfo))
+	{
+		flog(LOG_ERR, 
+			"AdvHomeAgentInfo for %s must be set with AdvMobRtrSupportFlag", iface->Name);
 		res = -1;
 	}
 

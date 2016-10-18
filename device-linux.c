@@ -1,5 +1,5 @@
 /*
- *   $Id: device-linux.c,v 1.13 2005/07/05 06:44:17 psavola Exp $
+ *   $Id: device-linux.c,v 1.21 2006/10/08 19:32:22 psavola Exp $
  *
  *   Authors:
  *    Lars Fenneberg		<lf@elemental.net>	 
@@ -9,7 +9,7 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <lutchann@litech.org>.
+ *   may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -33,10 +33,19 @@ setup_deviceinfo(int sock, struct Interface *iface)
 {
 	struct ifreq	ifr;
 	struct AdvPrefix *prefix;
-	char zero[HWADDR_MAX];
+	char zero[sizeof(iface->if_addr)];
 	
 	strncpy(ifr.ifr_name, iface->Name, IFNAMSIZ-1);
 	ifr.ifr_name[IFNAMSIZ-1] = '\0';
+
+	if (ioctl(sock, SIOCGIFMTU, &ifr) < 0) {
+		flog(LOG_ERR, "ioctl(SIOCGIFMTU) failed for %s: %s",
+			iface->Name, strerror(errno));
+		return (-1);
+	}
+
+	dlog(LOG_DEBUG, 3, "mtu for %s is %d", iface->Name, ifr.ifr_mtu);
+	iface->if_maxmtu = ifr.ifr_mtu;
 
 	if (ioctl(sock, SIOCGIFHWADDR, &ifr) < 0)
 	{
@@ -53,13 +62,11 @@ setup_deviceinfo(int sock, struct Interface *iface)
 	case ARPHRD_ETHER:
 		iface->if_hwaddr_len = 48;
 		iface->if_prefix_len = 64;
-		iface->if_maxmtu = 1500;
 		break;
 #ifdef ARPHRD_FDDI
 	case ARPHRD_FDDI:
 		iface->if_hwaddr_len = 48;
 		iface->if_prefix_len = 64;
-		iface->if_maxmtu = 4352;
 		break;
 #endif /* ARPHDR_FDDI */
 #ifdef ARPHRD_ARCNET
@@ -83,10 +90,16 @@ setup_deviceinfo(int sock, struct Interface *iface)
 		iface->if_prefix_len);
 
 	if (iface->if_hwaddr_len != -1) {
-		memcpy(iface->if_hwaddr, ifr.ifr_hwaddr.sa_data, (iface->if_hwaddr_len + 7) >> 3);
+		unsigned int if_hwaddr_len_bytes = (iface->if_hwaddr_len + 7) >> 3;
+		
+		if (if_hwaddr_len_bytes > sizeof(iface->if_hwaddr)) {
+			flog(LOG_ERR, "address length %d too big for %s", if_hwaddr_len_bytes, iface->Name);
+			return(-2);
+		}
+		memcpy(iface->if_hwaddr, ifr.ifr_hwaddr.sa_data, if_hwaddr_len_bytes);
 
-		memset(zero, 0, (iface->if_hwaddr_len + 7) >> 3);
-		if (!memcmp(iface->if_hwaddr, zero, (iface->if_hwaddr_len + 7) >> 3))
+		memset(zero, 0, sizeof(zero));
+		if (!memcmp(iface->if_hwaddr, zero, if_hwaddr_len_bytes))
 			flog(LOG_WARNING, "WARNING, MAC address on %s is all zero!",
 				iface->Name);
 	}
@@ -109,7 +122,7 @@ setup_deviceinfo(int sock, struct Interface *iface)
 
 /*
  * this function extracts the link local address and interface index
- * from PATH_PROC_NET_IF_INET6
+ * from PATH_PROC_NET_IF_INET6.  Note: 'sock' unused in Linux.
  */
 int setup_linklocal_addr(int sock, struct Interface *iface)
 {
@@ -141,7 +154,7 @@ int setup_linklocal_addr(int sock, struct Interface *iface)
 				sscanf(str_addr + i * 2, "%02x", &ap);
 				addr.s6_addr[i] = (unsigned char)ap;
 			}
-			memcpy(&iface->if_addr, &addr, sizeof(addr));
+			memcpy(&iface->if_addr, &addr, sizeof(iface->if_addr));
 
 			iface->if_index = if_idx;
 			fclose(fp);
@@ -213,41 +226,73 @@ int check_allrouters_membership(int sock, struct Interface *iface)
 	return(0);
 }		
 
-int
-get_v4addr(const char *ifn, unsigned int *dst)
+static int
+set_interface_var(const char *iface,
+		  const char *var, const char *name,
+		  uint32_t val)
 {
-	struct ifreq	ifr;
-	struct sockaddr_in *addr;
-	int fd;
+	FILE *fp;
+	char spath[64+IFNAMSIZ];	/* XXX: magic constant */
+	snprintf(spath, sizeof(spath), var, iface);
 
-	if( ( fd = socket(AF_INET,SOCK_DGRAM,0) ) < 0 )
-	{
-		flog(LOG_ERR, "create socket for IPv4 ioctl failed for %s: %s",
-			ifn, strerror(errno));
-		return (-1);
+	fp = fopen(spath, "w");
+	if (!fp) {
+		if (name)
+			flog(LOG_ERR, "failed to set %s (%u) for %s",
+			     name, val, iface);
+		return -1;
 	}
-	
-	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifn, IFNAMSIZ-1);
-	ifr.ifr_name[IFNAMSIZ-1] = '\0';
-	ifr.ifr_addr.sa_family = AF_INET;
-	
-	if (ioctl(fd, SIOCGIFADDR, &ifr) < 0)
-	{
-		flog(LOG_ERR, "ioctl(SIOCGIFADDR) failed for %s: %s",
-			ifn, strerror(errno));
-		close( fd );
-		return (-1);
-	}
-
-	addr = (struct sockaddr_in *)(&ifr.ifr_addr);
-
-	dlog(LOG_DEBUG, 3, "IPv4 address for %s is %s", ifn,
-		inet_ntoa( addr->sin_addr ) ); 
-
-	*dst = addr->sin_addr.s_addr;
-
-	close( fd );
+	fprintf(fp, "%u", val);
+	fclose(fp);
 
 	return 0;
 }
+
+int
+set_interface_linkmtu(const char *iface, uint32_t mtu)
+{
+	return set_interface_var(iface,
+				 PROC_SYS_IP6_LINKMTU, "LinkMTU",
+				 mtu);
+}
+
+int
+set_interface_curhlim(const char *iface, uint8_t hlim)
+{
+	return set_interface_var(iface,
+				 PROC_SYS_IP6_CURHLIM, "CurHopLimit",
+				 hlim);
+}
+
+int
+set_interface_reachtime(const char *iface, uint32_t rtime)
+{
+	int ret;
+	ret = set_interface_var(iface,
+				PROC_SYS_IP6_BASEREACHTIME_MS,
+				NULL,
+				rtime);
+	if (ret)
+		ret = set_interface_var(iface,
+					PROC_SYS_IP6_BASEREACHTIME,
+					"BaseReachableTimer",
+					rtime / 1000);
+	return ret;
+}
+
+int
+set_interface_retranstimer(const char *iface, uint32_t rettimer)
+{
+	int ret;
+	ret = set_interface_var(iface,
+				PROC_SYS_IP6_RETRANSTIMER_MS,
+				NULL,
+				rettimer);
+	if (ret)
+		ret = set_interface_var(iface,
+					PROC_SYS_IP6_RETRANSTIMER,
+					"RetransTimer",
+					rettimer / 1000);
+	return ret;
+}
+

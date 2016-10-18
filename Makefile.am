@@ -1,5 +1,5 @@
 #
-#   $Id: Makefile.am,v 1.2 2004/08/20 07:25:59 psavola Exp $
+#   $Id: Makefile.am,v 1.4 2005/12/30 15:13:11 psavola Exp $
 #
 #   Authors:
 #    Lars Fenneberg		<lf@elemental.net>	 
@@ -9,7 +9,7 @@
 #
 #   The license which is distributed with this software in the file COPYRIGHT
 #   applies to this software. If your distribution is missing this file, you
-#   may request it from <lutchann@litech.org>.
+#   may request it from <pekkas@netcore.fi>.
 #
 
 AUTOMAKE_OPTIONS = 1.2 foreign
@@ -32,6 +32,8 @@ radvd_SOURCES = $(COMMON_SRC) radvd.c timer.c send.c process.c interface.c \
 radvd_LDADD = -lfl
 EXTRA_radvd_SOURCES = device-linux.c device-bsd44.c
 YFLAGS = -d
+CFLAGS = @CFLAGS@ -Wall -Wpointer-arith  -Wcast-qual -Wcast-align -Wconversion \
+	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations
 
 radvdump_SOURCES = $(COMMON_SRC) radvdump.c
 

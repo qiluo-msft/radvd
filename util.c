@@ -1,5 +1,5 @@
 /*
- *   $Id: util.c,v 1.4 2005/02/15 07:44:06 psavola Exp $
+ *   $Id: util.c,v 1.8 2006/10/08 19:20:02 psavola Exp $
  *
  *   Authors:
  *    Lars Fenneberg		<lf@elemental.net>	 
@@ -9,7 +9,7 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <lutchann@litech.org>.
+ *   may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -18,7 +18,7 @@
 #include <radvd.h>
                
 void
-mdelay(int msecs)
+mdelay(double msecs)
 {
 	struct timeval tv;
                 
@@ -44,6 +44,22 @@ print_addr(struct in6_addr *addr, char *str)
 	
 	if (res == NULL) 
 	{
+		flog(LOG_ERR, "print_addr: inet_ntop: %s", strerror(errno));		
 		strcpy(str, "[invalid address]");	
 	}
+}
+
+/* Check if an in6_addr exists in the rdnss list */
+int
+check_rdnss_presence(struct AdvRDNSS *rdnss, struct in6_addr *addr)
+{
+	while (rdnss) {
+		if (    !memcmp(&rdnss->AdvRDNSSAddr1, addr, sizeof(struct in6_addr)) 
+		     || !memcmp(&rdnss->AdvRDNSSAddr2, addr, sizeof(struct in6_addr))
+		     || !memcmp(&rdnss->AdvRDNSSAddr3, addr, sizeof(struct in6_addr)) )
+			break; /* rdnss address found in the list */
+		else
+			rdnss = rdnss->next; /* no match */
+	}
+	return (rdnss != NULL);
 }

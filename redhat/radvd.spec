@@ -1,4 +1,4 @@
-# $Id: radvd.spec,v 1.13 2005/07/08 11:49:58 psavola Exp $
+# $Id: radvd.spec,v 1.17 2006/11/01 14:54:28 psavola Exp $
 
 %define initdir /etc/rc.d/init.d
 #%(if test -d /etc/init.d/. ; then echo /etc/init.d ; else echo /etc/rc.d/init.d ; fi)
@@ -7,7 +7,7 @@
 
 Summary: A Router Advertisement daemon
 Name: radvd
-Version: 0.8
+Version: 1.0
 Release: 1
 # The code includes the advertising clause, so it's GPL-incompatible
 License: BSD-style
@@ -16,6 +16,7 @@ Packager: Pekka Savola <pekkas@netcore.fi>
 Source: http://www.litech.org/radvd/radvd-%{version}.tar.gz
 PreReq: chkconfig, /usr/sbin/useradd, /sbin/service, initscripts
 BuildRoot: %{_tmppath}/%{name}-root
+BuildRequires: flex, byacc
 
 %description
 radvd is the router advertisement daemon for IPv6.  It listens to router
@@ -32,8 +33,13 @@ services.
 %setup
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE" %configure --with-pidfile=/var/run/radvd/radvd.pid
-make %{?_smp_mflags}
+export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE" 
+%configure --with-pidfile=/var/run/radvd/radvd.pid
+make
+# make %{?_smp_mflags} 
+# Parallel builds still fail because seds that transform y.tab.x into
+# scanner/gram.x are not executed before compile of scanner/gram.x
+#
 
 %install
 [ $RPM_BUILD_ROOT != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -81,6 +87,15 @@ fi
 %{_sbindir}/radvdump
 
 %changelog
+* Wed Nov  1 2006 Pekka Savola <pekkas@netcore.fi> 1.0-1
+- 1.0; add BuildRequires
+
+* Fri Jan 13 2006 Pekka Savola <pekkas@netcore.fi> 0.9.1-1
+- 0.9.1
+
+* Tue Oct 18 2005 Pekka Savola <pekkas@netcore.fi> 0.9-1
+- 0.9 (also minor spec file cleanup in %%configure).
+
 * Fri Jul  8 2005 Pekka Savola <pekkas@netcore.fi> 0.8-1
 - 0.8.
 - Ship the example config file as %%doc (Red Hat's #159005)

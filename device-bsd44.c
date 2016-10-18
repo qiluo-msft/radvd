@@ -1,5 +1,5 @@
 /*
- *   $Id: device-bsd44.c,v 1.14 2005/03/22 10:29:13 psavola Exp $
+ *   $Id: device-bsd44.c,v 1.22 2006/10/08 19:25:29 psavola Exp $
  *
  *   Authors:
  *    Craig Metz		<cmetz@inner.net>
@@ -9,7 +9,7 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <lutchann@litech.org>.
+ *   may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -30,10 +30,11 @@ int
 setup_deviceinfo(int sock, struct Interface *iface)
 {
 	struct ifconf ifconf;
-	int nlen;
+	struct ifreq ifr;
+	unsigned int nlen;
 	uint8_t *p, *end;
 	struct AdvPrefix *prefix;
-	char zero[HWADDR_MAX];
+	char zero[sizeof(iface->if_addr)];
 
 	/* just allocate 8192 bytes, should be more than enough.. */
 	if (!(ifconf.ifc_buf = malloc(ifconf.ifc_len = (32 << 8))))
@@ -47,6 +48,18 @@ setup_deviceinfo(int sock, struct Interface *iface)
 		flog(LOG_ERR, "ioctl(SIOCGIFCONF) failed: %s(%d)", strerror(errno), errno);
 		goto ret;
 	}
+
+ 	memset(&ifr, 0, sizeof(ifr));
+	strncpy(ifr.ifr_name, iface->Name, IFNAMSIZ-1);
+	ifr.ifr_name[IFNAMSIZ-1] = '\0';
+
+	if (ioctl(sock, SIOCGIFMTU, &ifr) < 0) {
+		flog(LOG_ERR, "ioctl(SIOCGIFMTU) failed for %s: %s", iface->Name, strerror(errno));
+		goto ret;
+	}	
+
+	dlog(LOG_DEBUG, 3, "mtu for %s is %d", iface->Name, ifr.ifr_mtu);
+	iface->if_maxmtu = ifr.ifr_mtu;
 
 	p = (uint8_t *)ifconf.ifc_buf;
 	end = p + ifconf.ifc_len;
@@ -67,7 +80,7 @@ setup_deviceinfo(int sock, struct Interface *iface)
 		    (!memcmp(iface->Name, ((struct sockaddr_dl *)p)->sdl_data, nlen)))
 		{
 		
-			if (((struct sockaddr_dl *)p)->sdl_alen > HWADDR_MAX)
+			if (((struct sockaddr_dl *)p)->sdl_alen > sizeof(iface->if_addr))
 			{
 				flog(LOG_ERR, "address length %d too big for",
 					((struct sockaddr_dl *)p)->sdl_alen,
@@ -82,11 +95,9 @@ setup_deviceinfo(int sock, struct Interface *iface)
             		case IFT_ETHER:
             		case IFT_ISO88023:
             			iface->if_prefix_len = 64;
-              			iface->if_maxmtu = 1500;
               			break;
             		case IFT_FDDI:
             			iface->if_prefix_len = 64;
-              			iface->if_maxmtu = 4352;
               			break;
             		default:
             			iface->if_prefix_len = -1;
@@ -138,7 +149,7 @@ ret:
 int setup_linklocal_addr(int sock, struct Interface *iface)
 {
 	struct ifconf ifconf;
-	int nlen;
+	unsigned int nlen;
 	uint8_t *p, *end;
 	int index = 0;
 
@@ -206,45 +217,35 @@ int check_allrouters_membership(int sock, struct Interface *iface)
 	return (0);
 }
 
-/* UNTESTED - This code is from device-linux.c and has not been tested
- * under BSD.  If it is broken in the distribution and you fix it, please
- * send me the patch.  -lutchann */
+int
+set_interface_linkmtu(const char *iface, uint32_t mtu)
+{
+	dlog(LOG_DEBUG, 4, "setting LinkMTU (%u) for %s is not supported",
+	     mtu, iface);
+	return -1;
+}
 
 int
-get_v4addr(const char *ifn, unsigned int *dst)
+set_interface_curhlim(const char *iface, uint8_t hlim)
 {
-	struct ifreq	ifr;
-	struct sockaddr_in *addr;
-	int fd;
-
-	if( ( fd = socket(AF_INET,SOCK_DGRAM,0) ) < 0 )
-	{
-		flog(LOG_ERR, "create socket for IPv4 ioctl failed for %s: %s",
-			ifn, strerror(errno));
-		return (-1);
-	}
-	
-	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, ifn, IFNAMSIZ-1);
-	ifr.ifr_name[IFNAMSIZ-1] = '\0';
-	ifr.ifr_addr.sa_family = AF_INET;
-	
-	if (ioctl(fd, SIOCGIFADDR, &ifr) < 0)
-	{
-		flog(LOG_ERR, "ioctl(SIOCGIFADDR) failed for %s: %s",
-			ifn, strerror(errno));
-		close( fd );
-		return (-1);
-	}
-
-	addr = (struct sockaddr_in *)(&ifr.ifr_addr);
-
-	dlog(LOG_DEBUG, 3, "IPv4 address for %s is %s", ifn,
-		inet_ntoa( addr->sin_addr ) ); 
-
-	*dst = addr->sin_addr.s_addr;
-
-	close( fd );
-
-	return 0;
+	dlog(LOG_DEBUG, 4, "setting CurHopLimit (%u) for %s is not supported",
+	     hlim, iface);
+	return -1;
 }
+
+int
+set_interface_reachtime(const char *iface, uint32_t rtime)
+{
+	dlog(LOG_DEBUG, 4, "setting BaseReachableTime (%u) for %s is not supported",
+	     rtime, iface);
+	return -1;
+}
+
+int
+set_interface_retranstimer(const char *iface, uint32_t rettimer)
+{
+	dlog(LOG_DEBUG, 4, "setting RetransTimer (%u) for %s is not supported",
+	     rettimer, iface);
+	return -1;
+}
+

@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.c,v 1.21 2005/03/22 10:29:13 psavola Exp $
+ *   $Id: radvd.c,v 1.30 2006/10/08 19:04:28 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -10,7 +10,7 @@
  *
  *   The license which is distributed with this software in the file COPYRIGHT
  *   applies to this software. If your distribution is missing this file, you
- *   may request it from <lutchann@litech.org>.
+ *   may request it from <pekkas@netcore.fi>.
  *
  */
 
@@ -55,9 +55,9 @@ void sighup_handler(int sig);
 void sigterm_handler(int sig);
 void sigint_handler(int sig);
 void timer_handler(void *data);
+void config_interface(void);
 void kickoff_adverts(void);
 void stop_adverts(void);
-void reload_config(void);
 void version(void);
 void usage(void);
 int drop_root_privileges(const char *);
@@ -71,6 +71,7 @@ main(int argc, char *argv[])
 	char pidstr[16];
 	int c, log_method;
 	char *logfile, *pidfile;
+	 sigset_t oset, nset;
 	int facility, fd;
 	char *username = NULL;
 	char *chrootdir = NULL;
@@ -82,7 +83,7 @@ main(int argc, char *argv[])
 
 	srand((unsigned int)time(NULL));
 
-	log_method = L_SYSLOG;
+	log_method = L_STDERR_SYSLOG;
 	logfile = PATH_RADVD_LOG;
 	conf_file = PATH_RADVD_CONF;
 	facility = LOG_FACILITY;
@@ -115,6 +116,10 @@ main(int argc, char *argv[])
 			if (!strcmp(optarg, "syslog"))
 			{
 				log_method = L_SYSLOG;
+			}
+			else if (!strcmp(optarg, "stderr_syslog"))
+			{
+				log_method = L_STDERR_SYSLOG;
 			}
 			else if (!strcmp(optarg, "stderr"))
 			{
@@ -232,17 +237,26 @@ main(int argc, char *argv[])
 		if (daemon(0, 0) < 0)
 			perror("daemon");
 
-		/*
-		 * reopen logfile, so that we get the process id right in the syslog
-		 */
-		if (log_reopen() < 0)
+		/* close old logfiles, including stderr */
+		log_close();
+		
+		/* reopen logfiles, but don't log to stderr unless explicitly requested */
+		if (log_method == L_STDERR_SYSLOG)
+			log_method = L_SYSLOG;
+		if (log_open(log_method, pname, logfile, facility) < 0)
 			exit(1);
 
 	}
 
 	/*
-	 *	config signal handlers
+	 *	config signal handlers, also make sure ALRM isn't blocked and raise a warning if so
+	 *      (some stupid scripts/pppd appears to do this...)
 	 */
+	sigemptyset(&nset);
+	sigaddset(&nset, SIGALRM);
+	sigprocmask(SIG_UNBLOCK, &nset, &oset);
+	if (sigismember(&oset, SIGALRM))
+		flog(LOG_WARNING, "SIGALRM has been unblocked. Your startup environment might be wrong.");
 
 	signal(SIGHUP, sighup_handler);
 	signal(SIGTERM, sigterm_handler);
@@ -254,6 +268,7 @@ main(int argc, char *argv[])
 	
 	close(fd);
 
+	config_interface();
 	kickoff_adverts();
 
 	/* enter loop */
@@ -296,7 +311,31 @@ timer_handler(void *data)
 	send_ra(sock, iface, NULL);
 
 	next = rand_between(iface->MinRtrAdvInterval, iface->MaxRtrAdvInterval); 
+
+	if (iface->init_racount < MAX_INITIAL_RTR_ADVERTISEMENTS)
+	{
+		iface->init_racount++;
+		next = min(MAX_INITIAL_RTR_ADVERT_INTERVAL, next);
+	}
+
 	set_timer(&iface->tm, next);
+}
+
+void
+config_interface(void)
+{
+	struct Interface *iface;
+	for(iface=IfaceList; iface; iface=iface->next)
+	{
+		if (iface->AdvLinkMTU)
+			set_interface_linkmtu(iface->Name, iface->AdvLinkMTU);
+		if (iface->AdvCurHopLimit)
+			set_interface_curhlim(iface->Name, iface->AdvCurHopLimit);
+		if (iface->AdvReachableTime)
+			set_interface_reachtime(iface->Name, iface->AdvReachableTime);
+		if (iface->AdvRetransTimer)
+			set_interface_retranstimer(iface->Name, iface->AdvRetransTimer);
+	}
 }
 
 void
@@ -318,7 +357,11 @@ kickoff_adverts(void)
 				/* send an initial advertisement */
 				send_ra(sock, iface, NULL);
 
-				set_timer(&iface->tm, iface->MaxRtrAdvInterval);
+				iface->init_racount++;
+
+				set_timer(&iface->tm,
+					  min(MAX_INITIAL_RTR_ADVERT_INTERVAL,
+					      iface->MaxRtrAdvInterval));
 			}
 		}
 	}
@@ -371,6 +414,7 @@ void reload_config(void)
 		struct Interface *next_iface = iface->next;
 		struct AdvPrefix *prefix;
 		struct AdvRoute *route;
+		struct AdvRDNSS *rdnss;
 
 		dlog(LOG_DEBUG, 4, "freeing interface %s", iface->Name);
 		
@@ -390,7 +434,16 @@ void reload_config(void)
 
 			free(route);
 			route = next_route;
-		}  
+		}
+		
+		rdnss = iface->AdvRDNSSList;
+		while (rdnss) 
+		{
+			struct AdvRDNSS *next_rdnss = rdnss->next;
+			
+			free(rdnss);
+			rdnss = next_rdnss;
+		}	 
 
 		free(iface);
 		iface = next_iface;
@@ -402,6 +455,7 @@ void reload_config(void)
 	if (readin_config(conf_file) < 0)
 		exit(1);
 
+	config_interface();
 	kickoff_adverts();
 
 	flog(LOG_INFO, "resuming normal operation");
@@ -501,7 +555,8 @@ check_conffile_perm(const char *username, const char *conf_file)
         return 0;
 
 errorout:
-	free(st);
+	if (st)
+		free(st);
 	return(-1);
 }
 
@@ -580,6 +635,4 @@ usage(void)
 	fprintf(stderr, "usage: %s %s\n", pname, usage_str);
 	exit(1);	
 }
-
-
 

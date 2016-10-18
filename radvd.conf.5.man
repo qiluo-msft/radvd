@@ -1,5 +1,5 @@
 .\"
-.\"   $Id: radvd.conf.5.man,v 1.12 2004/10/26 05:30:34 psavola Exp $
+.\"   $Id: radvd.conf.5.man,v 1.20 2006/06/09 11:46:49 psavola Exp $
 .\"
 .\"   Authors:
 .\"    Lars Fenneberg		<lf@elemental.net>
@@ -10,7 +10,7 @@
 .\"
 .\"   The license which is distributed with this software in the file COPYRIGHT
 .\"   applies to this software. If your distribution is missing this file, you
-.\"   may request it from <lutchann@litech.org>.
+.\"   may request it from <pekkas@netcore.fi>.
 .\"
 .\"
 .\"
@@ -29,6 +29,7 @@ The file contains one or more interface definitions of the form:
 	list of interface specific options
 	list of prefix definitions
 	list of route definitions
+	list of RDNSS definitions
 .B };
 .fi
 
@@ -65,16 +66,30 @@ Route definitions are of the form:
 The prefix of a route definition should be network prefix; it can be used to
 advertise more specific routes to the hosts.
 
+RDNSS (Recursive DNS server) definitions are of the form:
+
+.nf
+.BR "RDNSS " "ip [ip] [ip] " {
+	list of rdnss specific options
+.B };
+.fi
+
 .SH INTERFACE SPECIFIC OPTIONS
 
 .TP
 .BR IgnoreIfMissing " " on | off
 
 A flag indicating whether or not the interface is ignored
-if it does not exist.
+if it does not exist at start-up.  By default, radvd exits.
+
 This is useful for dynamic interfaces which are not active when radvd
-starts, but for which you want to already have configuration -- and when
-they become active, you send HUP signal to radvd to activate them.
+starts or which are dynamically disabled and re-enabled during the time
+radvd runs.
+
+Current versions of radvd automatically try to re-enable interfaces.
+
+Enabling IgnoreIfMissing also quenches certain warnings in log messages
+relating to missing interfaces.
 
 Default: off
 
@@ -287,6 +302,15 @@ default values, Home Agent Information Option will not be sent.
 Default: 0
 
 .TP
+.BR AdvMobRtrSupportFlag " " on | off
+
+When set, the Home Agent signals it supports Mobile Router
+registrations (specified by NEMO Basic).  AdvHomeAgentInfo must also
+be set when using this option.
+
+Default: off
+
+.TP
 .BR AdvIntervalOpt " " on | off
 
 When set, Advertisement Interval Option (specified by Mobile IPv6)
@@ -413,6 +437,33 @@ The preference associated with the default router, as either "low",
 
 Default: medium
 
+.SH RDNSS SPECIFIC OPTIONS
+
+.TP
+.BR "AdvRDNSSPreference " integer;
+
+The preference of the DNS server, compared to other DNS servers advertised and used.
+0 to 7 means less important than manually configured nameservers in resolv.conf, while 12 to 15 means more important.
+
+Default: 8
+
+.TP
+.BR "AdvRDNSSOpen " on | off;
+
+"Service Open" flag. When set, indicates that RDNSS continues to be available to hosts even if they moved to a different subnet.
+
+Default: off
+
+.TP
+.BR "AdvRDNSSLifetime " seconds | infinity;
+The maximum duration how long the RDNSS entries are used for name resolution. A value of 0 means the nameserver should no longer be used.
+The maximum duration how long the RDNSS entries are used for name resolution. A value of 0 means the nameserver should no longer be used.
+The value, if not 0, must be at least MaxRtrAdvInterval.  To ensure stale
+RDNSS info gets removed in a timely fashion, this should not be greater than
+2*MaxRtrAdvInterval.
+
+Default: 2*MaxRtrAdvInterval
+
 .SH EXAMPLES
 
 .nf
@@ -485,8 +536,10 @@ ppp0 at configuration time. (IPv6 addresses are written in hexadecimal
 whereas IPv4 addresses are written in decimal, so the IPv4 address
 WW.XX.YY.ZZ in the 6to4 prefix will be represented in hex.)
 
-In this specific case, the configuration scripts should send HUP signal to
-radvd when taking bnep0 up or down to notify about the status.
+In this specific case, the configuration scripts may send HUP signal to
+radvd when taking bnep0 up or down to notify about the status; in the
+current radvd releases, sending HUP is no longer mandatory when the link
+comes back up.
 
 .SH FILES
 
@@ -508,8 +561,8 @@ Version 6 (IPv6)", RFC 2461, December 1998
 Thomson, S., and T. Narten, "IPv6 Stateless Address Autoconfiguration", 
 RFC 2462, December 1998.
 .PP
-Deering, S., and R. Hinden, Editors, "IP Version 6 Addressing
-Architecture", RFC 2373, July 1998.
+Deering, S., and R. Hinden, "IP Version 6 Addressing
+Architecture", RFC 3513, April 2003.
 .PP	
 Conta, A., and S. Deering, "Internet Control Message Protocol (ICMPv6)
 for the Internet Protocol Version 6 (IPv6)", RFC 2463, December 1998.
@@ -517,12 +570,20 @@ for the Internet Protocol Version 6 (IPv6)", RFC 2463, December 1998.
 Crawford, M., "Transmission of IPv6 Packets over Ethernet Networks",
 RFC 2464, December 1998.	
 .PP
-Carpenter B., Moore K., "Connection of IPv6 Domains via IPv4 Clouds",
+Carpenter B., K. Moore, "Connection of IPv6 Domains via IPv4 Clouds",
 RFC 3056, February 2001. (6to4 specification)
 .PP
-Draves, R., Hinden B., "Default Router Preferences, More-Specific Routes,
-and Load Sharing", draft-ietf-ipv6-router-selection-02.txt,
-work-in-progress, June 2002.
+Draves, R., D. Thaler, "Default Router Preferences and More-Specific Routes",
+RFC 4191, November 2005.
+.PP
+Johnson, D., Perkins, C., and J. Arkko, "Mobility Support in IPv6",
+RFC 3775, June 2004.
+.PP
+Devarapalli, V., Wakikawa, R., Petrescu, A., and P. Thubert "Network Mobility (NEMO) Basic Support Protocol",
+RFC 3963, January 2005.
+.PP
+J. Jeong, L. Beloeil, and S. Madanapalli, "IPv6 Router Advertisement Option for DNS Configuration",
+IETF Draft v08 (January 18, 2006).
 
 .SH "SEE ALSO"
 
