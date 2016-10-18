@@ -8,22 +8,24 @@ dnl   All Rights Reserved.
 dnl
 dnl   The license which is distributed with this software in the file COPYRIGHT
 dnl   applies to this software. If your distribution is missing this file, you
-dnl   may request it from <pekkas@netcore.fi>.
+dnl   may request it from <reubenhwk@gmail.com>.
 dnl
 dnl
 
-AC_INIT(radvd.c)
-
+dnl If adding rcX to version, be sure to separate with a '-' 
+AC_INIT(radvd, [2.11])
+AC_CONFIG_SRCDIR(radvd.c)
 AC_CANONICAL_SYSTEM
-VERSION=`cat ${srcdir}/VERSION | grep -v '^#' | tr -d '\012'`
-AM_INIT_AUTOMAKE(radvd,$VERSION,true)
+AM_INIT_AUTOMAKE
+
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES(yes)])
+
 
 AC_MSG_CHECKING([architecture])
 case "$target" in
 	*linux*)
 		AC_MSG_RESULT(linux)
-		AC_DEFINE([_GNU_SOURCE], [], [whether compiling on Linux, glibc>=2.8 doesn't expose in6_pktinfo otherwise..])
+		AC_DEFINE([_GNU_SOURCE], [], [whether compiling on Linux, glibc>=2.8 does not expose in6_pktinfo otherwise..])
                 arch=linux
         ;;
         *bsd*)
@@ -31,20 +33,29 @@ case "$target" in
                 arch=bsd44
         ;;
         *darwin*)
+		AC_DEFINE([__APPLE_USE_RFC_2292], [1], [OS X 10.9 wont build radvd without this])
 		AC_MSG_RESULT([bsd44 (darwin)])
                 arch=bsd44
         ;;
         *)      
 		AC_MSG_RESULT(unknown: $target)
 		AC_MSG_ERROR(
-[currently only Linux and BSD 4.4 with NRL's IPv6 code are
+[currently only Linux and BSD 4.4 with NRLs IPv6 code are
 supported. If you have such a system and it is not guessed correctly 
-you must specifiy it with --target on the configure command line])
+you must specify it with --target on the configure command line])
         ;;
 esac
 
 dnl Determine CC and preset CFLAGS
-AC_PROG_CC
+AC_PROG_CC_C99
+AC_PROG_RANLIB
+
+AC_ARG_WITH([check], AS_HELP_STRING([--without-check], [Build without check unit testing framework]),[],[with_check=no])
+AS_IF([test "x$with_check" = "xyes"], [
+    AS_IF([test "x$arch" = "xlinux"], [
+        PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
+    ])
+])
 
 dnl Determine of netlink is available
 AC_MSG_CHECKING(netlink)
@@ -75,15 +86,18 @@ AC_MSG_RESULT(yes)
 AC_MSG_RESULT(no)
 ])
 
+dnl clock_gettime is in librt for glibc <2.17
+AC_SEARCH_LIBS(clock_gettime, rt)
+
 dnl Needed for normal compile
 AC_PROG_INSTALL
 AC_PATH_PROG(RM, rm, NOTFOUND)
 if test "x$RM" = xNOTFOUND; then
-	AC_MSG_ERROR(can't find rm in your path - check PATH)
+	AC_MSG_ERROR(can not find rm in your path - check PATH)
 fi
 AC_PATH_PROG(SED, sed, NOTFOUND)
 if test "x$SED" = xNOTFOUND; then
-	AC_MSG_ERROR(can't find sed in your path - check PATH)
+	AC_MSG_ERROR(can not find sed in your path - check PATH)
 fi
 dnl Not needed
 AC_PATH_PROG(LN, ln)
@@ -131,13 +145,11 @@ AC_CHECK_LIB(c, inet_ntop,,
  AC_CHECK_LIB(inet6, inet_ntop,
   LIBS="$LIBS -linet6"
   ,
-    AC_MSG_ERROR(can't continue without libinet6.a library - check your LDFLAGS)
+    AC_MSG_ERROR(can not continue without libinet6.a library - check your LDFLAGS)
  )
 )
 # prevent caching
 unset ac_cv_lib_inet6_inet_ntop
-
-PKG_CHECK_MODULES([DAEMON], libdaemon)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -157,8 +169,6 @@ AC_CHECK_HEADERS( \
 AC_HEADER_TIME
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
 AC_MSG_CHECKING(whether struct sockaddr_in6 has sin6_scope_id)
 AC_TRY_COMPILE([#include <sys/types.h>
 #include <netinet/in.h>], [static struct sockaddr_in6 ac_sin6; int ac_size = 
@@ -174,6 +184,8 @@ AC_MSG_RESULT(no))
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(getopt_long)
+AC_CHECK_FUNCS(ppoll)
+AC_CHECK_FUNCS(sysctl)
 
 CONDITIONAL_SOURCES="device-${arch}.${OBJEXT} ${CONDITIONAL_SOURCES}"
 if test x${arch} = xlinux ; then
@@ -195,6 +207,7 @@ cat << EOF
 
 Your build configuration:
 
+	CPPFLAGS = $CPPFLAGS
 	CFLAGS = $CFLAGS
 	LDFLAGS = $LDFLAGS
 	Arch = ${arch}
