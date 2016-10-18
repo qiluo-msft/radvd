@@ -1,4 +1,4 @@
-# $Id: radvd.spec,v 1.20 2008/02/04 06:32:22 psavola Exp $
+# $Id: radvd.spec,v 1.23 2008/10/28 16:35:43 psavola Exp $
 
 %define initdir /etc/rc.d/init.d
 #%(if test -d /etc/init.d/. ; then echo /etc/init.d ; else echo /etc/rc.d/init.d ; fi)
@@ -7,10 +7,10 @@
 
 Summary: A Router Advertisement daemon
 Name: radvd
-Version: 1.1
+Version: 1.2
 Release: 1
 # The code includes the advertising clause, so it's GPL-incompatible
-License: BSD-style
+License: BSD with advertising
 Group: System Environment/Daemons
 URL:        http://www.litech.org/radvd/
 Source:     http://www.litech.org/radvd/dist/%{name}-%{version}.tar.gz
@@ -36,7 +36,6 @@ services.
 %setup -q
 
 %build
-export CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE" 
 %configure --with-pidfile=/var/run/radvd/radvd.pid
 make
 # make %{?_smp_mflags} 
@@ -94,6 +93,9 @@ fi
 %{_sbindir}/radvdump
 
 %changelog
+* Tue Oct 28 2008 Pekka Savola <pekkas@netcore.fi> 1.2-1
+- 1.2; remove -D_GNU_SOURCE
+
 * Mon Feb  4 2008 Pekka Savola <pekkas@netcore.fi> 1.1-1
 - 1.1
 

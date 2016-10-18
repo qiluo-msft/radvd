@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.c,v 1.34 2008/01/24 10:03:17 psavola Exp $
+ *   $Id: radvd.c,v 1.37 2008/10/15 05:34:35 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -70,6 +70,7 @@ main(int argc, char *argv[])
 {
 	unsigned char msg[MSG_SIZE];
 	char pidstr[16];
+	ssize_t ret;
 	int c, log_method;
 	char *logfile, *pidfile;
 	sigset_t oset, nset;
@@ -230,10 +231,29 @@ main(int argc, char *argv[])
 			exit(1);
 	}
 
-	/* FIXME: not atomic if pidfile is on an NFS mounted volume */	
-	if ((fd = open(pidfile, O_CREAT|O_EXCL|O_WRONLY, 0644)) < 0)
+	if ((fd = open(pidfile, O_RDONLY, 0)) > 0)
 	{
-		flog(LOG_ERR, "radvd pid file already exists or cannot be created, terminating: %s", strerror(errno));
+		ret = read(fd, pidstr, sizeof(pidstr) - 1);
+		if (ret < 0)
+		{
+			flog(LOG_ERR, "cannot read radvd pid file, terminating: %s", strerror(errno));
+			exit(1);
+		}
+		pidstr[ret] = '\0';
+		if (!kill((pid_t)atol(pidstr), 0))
+		{
+			flog(LOG_ERR, "radvd already running, terminating.");
+			exit(1);
+		}
+		close(fd);
+		fd = open(pidfile, O_CREAT|O_TRUNC|O_WRONLY, 0644);
+	}
+	else	/* FIXME: not atomic if pidfile is on an NFS mounted volume */
+		fd = open(pidfile, O_CREAT|O_EXCL|O_WRONLY, 0644);
+
+	if (fd < 0)
+	{
+		flog(LOG_ERR, "cannot create radvd pid file, terminating: %s", strerror(errno));
 		exit(1);
 	}
 	
@@ -273,7 +293,7 @@ main(int argc, char *argv[])
 	signal(SIGTERM, sigterm_handler);
 	signal(SIGINT, sigint_handler);
 
-	snprintf(pidstr, sizeof(pidstr), "%d\n", getpid());
+	snprintf(pidstr, sizeof(pidstr), "%ld\n", (long)getpid());
 	
 	write(fd, pidstr, strlen(pidstr));
 	
@@ -384,7 +404,7 @@ stop_adverts(void)
 	struct Interface *iface;
 
 	/*
-	 *	send final RA (a SHOULD in RFC2461 section 6.2.5)
+	 *	send final RA (a SHOULD in RFC4861 section 6.2.5)
 	 */
 
 	for (iface=IfaceList; iface; iface=iface->next) {

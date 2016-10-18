@@ -1827,6 +1827,11 @@ case "$target" in
 	*linux*)
 		echo "$as_me:$LINENO: result: linux" >&5
 echo "${ECHO_T}linux" >&6
+
+cat >>confdefs.h <<\_ACEOF
+#define _GNU_SOURCE
+_ACEOF
+
                 arch=linux
         ;;
         *bsd*)
