@@ -1,4 +1,39 @@
-$Id: CHANGES,v 1.62 2006/11/01 14:54:28 psavola Exp $
+$Id: CHANGES,v 1.71 2008/02/04 06:32:22 psavola Exp $
+
+04/02/2008	Release 1.1.
+
+24/01/2008	Implement privilege separation (Linux only) so that
+		config_interface() works both with a user and root,
+		even after HUP signal.  Work by Jim Paris.
+
+24/01/2008      The old Linux retrans_timer proc value is given in
+		USER_HZ, not in seconds.  Fix that, by Jim Paris.
+
+21/01/2008	Fix stderr+syslog logging crash (on non-i386).  Analysis and
+		patch by Jim Paris (Debian bug #409600).
+
+01/12/2007	Require that interface is also 'RUNNING' instead of just
+		'UP', except if IgnoreIfMissing is enabled.  The reason is
+		that at least some recent Linux kernels do not generate
+		link-local addresses before interface is running and as
+		a result, the startup may fail if network cable is unplugged
+		in any case.
+
+		Note: this could break deployments with some very old 
+                kernels, see more info at:
+
+		http://lists.litech.org/pipermail/radvd-devel-l/2007-October/000280.html
+
+25/10/2007	Implement automatically selecting and advertising an
+                interface address, see radvd.conf(5) for more.  Add
+		a warning about not being able to set interface
+		variables with non-root user.  Relax interface naming
+                a bit.
+
+25/06/2007	Send prefix, route and RDNSS options (matters if there
+		are many RDNSS options) in the same order they appear
+		in the configuration; add support for AdvDefaultLifetime
+		in radvdump (patches from C. Scott Ananian)
 
 11/01/2006	Release 1.0.
 

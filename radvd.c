@@ -1,5 +1,5 @@
 /*
- *   $Id: radvd.c,v 1.30 2006/10/08 19:04:28 psavola Exp $
+ *   $Id: radvd.c,v 1.34 2008/01/24 10:03:17 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -22,7 +22,7 @@
 struct Interface *IfaceList = NULL;
 
 char usage_str[] =
-	"[-vh] [-d level] [-C config_file] [-m log_method] [-l log_file]\n"
+	"[-hsv] [-d level] [-C config_file] [-m log_method] [-l log_file]\n"
 	"\t[-f facility] [-p pid_file] [-u username] [-t chrootdir]";
 
 #ifdef HAVE_GETOPT_LONG
@@ -37,6 +37,7 @@ struct option prog_opt[] = {
 	{"chrootdir", 1, 0, 't'},
 	{"version", 0, 0, 'v'},
 	{"help", 0, 0, 'h'},
+	{"singleprocess", 0, 0, 's'},
 	{NULL, 0, 0, 0}
 };
 #endif
@@ -71,10 +72,11 @@ main(int argc, char *argv[])
 	char pidstr[16];
 	int c, log_method;
 	char *logfile, *pidfile;
-	 sigset_t oset, nset;
+	sigset_t oset, nset;
 	int facility, fd;
 	char *username = NULL;
 	char *chrootdir = NULL;
+	int singleprocess = 0;
 #ifdef HAVE_GETOPT_LONG
 	int opt_idx;
 #endif
@@ -91,9 +93,9 @@ main(int argc, char *argv[])
 
 	/* parse args */
 #ifdef HAVE_GETOPT_LONG
-	while ((c = getopt_long(argc, argv, "d:C:l:m:p:t:u:vh", prog_opt, &opt_idx)) > 0)
+	while ((c = getopt_long(argc, argv, "d:C:l:m:p:t:u:vhs", prog_opt, &opt_idx)) > 0)
 #else
-	while ((c = getopt(argc, argv, "d:C:l:m:p:t:u:vh")) > 0)
+	while ((c = getopt(argc, argv, "d:C:l:m:p:t:u:vhs")) > 0)
 #endif
 	{
 		switch (c) {
@@ -148,6 +150,9 @@ main(int argc, char *argv[])
 		case 'v':
 			version();
 			break;
+		case 's':
+			singleprocess = 1;
+			break;
 		case 'h':
 			usage();
 #ifdef HAVE_GETOPT_LONG
@@ -189,12 +194,6 @@ main(int argc, char *argv[])
 	if (sock < 0)
 		exit(1);
 
-	/* drop root privileges if requested. */
-	if (username) {
-		if (drop_root_privileges(username) < 0)
-			exit(1);
-	}
-
 	/* check that 'other' cannot write the file
          * for non-root, also that self/own group can't either
          */
@@ -219,10 +218,22 @@ main(int argc, char *argv[])
 	if (readin_config(conf_file) < 0)
 		exit(1);
 
+	/* drop root privileges if requested. */
+	if (username) {
+		if (!singleprocess) {
+		 	dlog(LOG_DEBUG, 3, "Initializing privsep");
+		 	if (privsep_init() < 0)
+				flog(LOG_WARNING, "Failed to initialize privsep.");
+		}
+
+		if (drop_root_privileges(username) < 0)
+			exit(1);
+	}
+
 	/* FIXME: not atomic if pidfile is on an NFS mounted volume */	
 	if ((fd = open(pidfile, O_CREAT|O_EXCL|O_WRONLY, 0644)) < 0)
 	{
-		flog(LOG_ERR, "another radvd seems to be already running, terminating");
+		flog(LOG_ERR, "radvd pid file already exists or cannot be created, terminating: %s", strerror(errno));
 		exit(1);
 	}
 	
@@ -455,6 +466,7 @@ void reload_config(void)
 	if (readin_config(conf_file) < 0)
 		exit(1);
 
+	/* XXX: fails due to lack of permissions with non-root user */
 	config_interface();
 	kickoff_adverts();
 

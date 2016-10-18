@@ -1,5 +1,5 @@
 /*
- *   $Id: scanner.l,v 1.13 2006/08/24 11:39:00 psavola Exp $
+ *   $Id: scanner.l,v 1.15 2007/10/25 20:34:55 psavola Exp $
  *
  *   Authors:
  *    Pedro Roque		<roque@di.fc.ul.pt>
@@ -34,7 +34,7 @@ addr2		{hexdigit}{1,4}(":"{hexdigit}{1,4})*"::"
 addr3		({hexdigit}{1,4}":"){7}{hexdigit}{1,4}
 addr		({addr1}|{addr2}|{addr3}|"::")
 whitespace	([ \t])+
-string		[a-z]([a-z]|{digit}|_)*([:.]{digit}+)?
+string		[a-z]([a-z:._-]|{digit})*([:.]{digit}+)?
 %%
 
 #.*$			{/* ignore comments */}
@@ -89,18 +89,7 @@ AdvMobRtrSupportFlag	{ return T_AdvMobRtrSupportFlag; }
 
 {addr}		{
 			static struct in6_addr addr;
-			int i;
-				
-			i = inet_pton(AF_INET6, yytext, &addr);
-
-			dlog(LOG_DEBUG, 4, "inet_pton returned %d", i);
-
-			/* BSD API draft and NRL's code don't aggree on
-			 * this. the draft specifies a return value of 1 on 
-			 * success, NRL's code returns the address length in 
-			 * bytes on success (16 for an IPv6 address)
-			 */
-			if (i < 1) {
+			if (inet_pton(AF_INET6, yytext, &addr) < 1) {
 				flog(LOG_ERR, "invalid address in %s, line %d", conf_file,
 					num_lines);
 				return T_BAD_TOKEN;
