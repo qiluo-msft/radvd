@@ -32,6 +32,7 @@
 # CPP is C PreProcessor
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -121,7 +122,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = redhat/radvd.spec
+CONFIG_CLEAN_FILES = radvd.service redhat/radvd.spec
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
@@ -136,7 +137,7 @@ am_libradvd_parser_a_OBJECTS = libradvd_parser_a-gram.$(OBJEXT) \
 	libradvd_parser_a-scanner.$(OBJEXT)
 libradvd_parser_a_OBJECTS = $(am_libradvd_parser_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(man5dir)" \
-	"$(DESTDIR)$(man8dir)"
+	"$(DESTDIR)$(man8dir)" "$(DESTDIR)$(systemdsystemunitdir)"
 PROGRAMS = $(sbin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_check_all_OBJECTS = test/check_all-print_safe_buffer.$(OBJEXT) \
@@ -245,6 +246,7 @@ man5dir = $(mandir)/man5
 man8dir = $(mandir)/man8
 NROFF = nroff
 MANS = $(man_MANS)
+DATA = $(systemdsystemunit_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
@@ -444,9 +446,9 @@ TEST_LOG_DRIVER = $(SHELL) $(top_srcdir)/test-driver
 TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
 	$(TEST_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
-	$(top_srcdir)/redhat/radvd.spec.in README TODO compile \
-	config.guess config.sub depcomp gram.c gram.h install-sh \
-	missing scanner.c test-driver ylwrap
+	$(srcdir)/radvd.service.in $(top_srcdir)/redhat/radvd.spec.in \
+	README TODO compile config.guess config.sub depcomp gram.c \
+	gram.h install-sh missing scanner.c test-driver ylwrap
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -531,6 +533,7 @@ PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 RM = @RM@
+SBINDIR = @SBINDIR@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -585,6 +588,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemunitdir = @systemdsystemunitdir@
 target = @target@
 target_alias = @target_alias@
 target_cpu = @target_cpu@
@@ -681,12 +685,13 @@ EXTRA_DIST = \
 	radvd.8.man \
 	radvd.conf.5.man \
 	radvd.conf.example \
+	radvd.service.in \
 	radvdump.8.man \
+	redhat/radvd-tmpfs.conf \
 	redhat/radvd.conf.empty \
 	redhat/radvd.init \
 	redhat/radvd.spec \
 	redhat/radvd.sysconfig \
-	redhat/radvd-tmpfs.conf \
 	test/check.c \
 	test/print_safe_buffer.c \
 	test/print_safe_buffer.h \
@@ -741,6 +746,10 @@ check_all_LDADD = \
 	@CONDITIONAL_SOURCES@ \
 	libradvd-parser.a
 
+DISTCHECK_CONFIGURE_FLAGS = \
+  --with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
+
+@HAVE_SYSTEMD_TRUE@systemdsystemunit_DATA = radvd.service
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -794,6 +803,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+radvd.service: $(top_builddir)/config.status $(srcdir)/radvd.service.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 redhat/radvd.spec: $(top_builddir)/config.status $(top_srcdir)/redhat/radvd.spec.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
@@ -1212,6 +1223,27 @@ uninstall-man8:
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^8][0-9a-z]*$$,8,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	dir='$(DESTDIR)$(man8dir)'; $(am__uninstall_files_from_dir)
+install-systemdsystemunitDATA: $(systemdsystemunit_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(systemdsystemunit_DATA)'; test -n "$(systemdsystemunitdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(systemdsystemunitdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(systemdsystemunitdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(systemdsystemunitdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(systemdsystemunitdir)" || exit $$?; \
+	done
+
+uninstall-systemdsystemunitDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(systemdsystemunit_DATA)'; test -n "$(systemdsystemunitdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(systemdsystemunitdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -1605,9 +1637,9 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(LIBRARIES) $(PROGRAMS) $(MANS) config.h
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) $(MANS) $(DATA) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)"; do \
+	for dir in "$(DESTDIR)$(sbindir)" "$(DESTDIR)$(man5dir)" "$(DESTDIR)$(man8dir)" "$(DESTDIR)$(systemdsystemunitdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1671,7 +1703,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am: install-man install-systemdsystemunitDATA
 
 install-dvi: install-dvi-am
 
@@ -1718,7 +1750,8 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-man uninstall-sbinPROGRAMS
+uninstall-am: uninstall-man uninstall-sbinPROGRAMS \
+	uninstall-systemdsystemunitDATA
 
 uninstall-man: uninstall-man5 uninstall-man8
 
@@ -1736,12 +1769,13 @@ uninstall-man: uninstall-man5 uninstall-man8
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-man5 \
 	install-man8 install-pdf install-pdf-am install-ps \
-	install-ps-am install-sbinPROGRAMS install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
-	uninstall uninstall-am uninstall-man uninstall-man5 \
-	uninstall-man8 uninstall-sbinPROGRAMS
+	install-ps-am install-sbinPROGRAMS install-strip \
+	install-systemdsystemunitDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
+	ps ps-am recheck tags tags-am uninstall uninstall-am \
+	uninstall-man uninstall-man5 uninstall-man8 \
+	uninstall-sbinPROGRAMS uninstall-systemdsystemunitDATA
 
 .PRECIOUS: Makefile
 
