@@ -15,7 +15,7 @@ Package: radvd
 Architecture: any
 Depends: ${shlibs:Depends},
   adduser,
-  lsb-base,
+  lsb-base (>= 3.0-6),
   ${misc:Depends}
 Description: Router Advertisement Daemon
  IPv6 has a lot more support for autoconfiguration than IPv4. But
