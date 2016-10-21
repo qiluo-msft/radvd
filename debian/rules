@@ -7,10 +7,10 @@ export DEB_BUILD_OPTIONS=nocheck
 %:
 	dh $@ --with autoreconf
 
-override_dh_autobuild:
+override_dh_auto_build:
 	cp debian/copyright.in > COPYRIGHT
 
-override_dh_autoclean:
+override_dh_auto_clean:
 	rm -f gram.c gram.h scanner.c
 	rm -f privsep.c
 
