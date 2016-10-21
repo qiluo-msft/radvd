@@ -13,7 +13,10 @@ Homepage: http://www.litech.org/radvd/
 
 Package: radvd
 Architecture: any
-Depends: ${shlibs:Depends}, adduser, ${misc:Depends}
+Depends: ${shlibs:Depends},
+  adduser,
+  lsb-base,
+  ${misc:Depends}
 Description: Router Advertisement Daemon
  IPv6 has a lot more support for autoconfiguration than IPv4. But
  for this autoconfiguration to work on the hosts of a network, the

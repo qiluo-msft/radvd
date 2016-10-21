@@ -11,6 +11,7 @@ radvd (1:2.15-1.1) UNRELEASED; urgency=medium
   * Ship with INTRO.html. Closes: #494211.
   * Added Homepage and VCS Headers to debian/control. Closes: #796341.
   * Standard version from 3.9.6 to 3.9.8, no changes required.
+  * Depend on lsb-base
 
  -- Geert Stappers <stappers@debian.org>  Fri, 21 Oct 2016 23:07:48 +0200
 
