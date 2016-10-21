@@ -1,15 +1,15 @@
 radvd (1:2.15-1.1) UNRELEASED; urgency=medium
 
   * Non-maintainer upload.
-    How to do team maintainance is for after the freeze.
+    How to do team maintenance is for after the freeze.
     Remember, remember, the fifth of November.
   * New upstream release. Closes: #840238.
-  * Fixed typos in debian/rules override_ targets. Closes #834660.
+  * Fixed typos in debian/rules override_ targets. Closes: #834660.
   * No more mistake between README.Debian and init file about forwarding.
-    Closes #512746.
-  * Added install init error handler. Closes #398536.
-  * Ship with INTRO.html. Closes #494211.
-  * Added Homepage and VCS Headers to debian/control. Closes #796341.
+    Closes: #512746.
+  * Added install init error handler. Closes: #398536.
+  * Ship with INTRO.html. Closes: #494211.
+  * Added Homepage and VCS Headers to debian/control. Closes: #796341.
 
  -- Geert Stappers <stappers@debian.org>  Fri, 21 Oct 2016 17:18:21 +0200
 
