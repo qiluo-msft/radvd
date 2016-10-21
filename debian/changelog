@@ -10,8 +10,9 @@ radvd (1:2.15-1.1) UNRELEASED; urgency=medium
   * Added install init error handler. Closes: #398536.
   * Ship with INTRO.html. Closes: #494211.
   * Added Homepage and VCS Headers to debian/control. Closes: #796341.
+  * Standard version from 3.9.6 to 3.9.8, no changes required.
 
- -- Geert Stappers <stappers@debian.org>  Fri, 21 Oct 2016 17:18:21 +0200
+ -- Geert Stappers <stappers@debian.org>  Fri, 21 Oct 2016 23:07:48 +0200
 
 radvd (1:2.11-1) unstable; urgency=medium
 
