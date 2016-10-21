@@ -1,3 +1,10 @@
+radvd (1:2.15-1.1) UNRELEASED; urgency=medium
+
+  * Non-maintainer upload. How to do team maintainance is for after the freeze.
+  * New upstream release. Closes: #840238.
+
+ -- Geert Stappers <stappers@debian.org>  Fri, 21 Oct 2016 17:18:21 +0200
+
 radvd (1:2.11-1) unstable; urgency=medium
 
   * New upstream release
