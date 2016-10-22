@@ -1,1 +1,5 @@
+#
+# reminder TODO remove unused patches
+#  so cleaning up the debian/patches/ directory
+#
 kfreebsd.patch
