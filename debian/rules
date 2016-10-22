@@ -8,8 +8,8 @@ export DEB_BUILD_OPTIONS=nocheck
 	dh $@ --with autoreconf
 
 #NN override_dh_auto_build:
-	#NN cp debian/copyright.in > COPYRIGHT
-	#Not Now
+#NN	cp debian/copyright.in > COPYRIGHT
+## Not Now
 
 override_dh_auto_clean:
 	rm -f gram.c gram.h scanner.c
