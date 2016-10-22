@@ -19,3 +19,10 @@ do `gbp buildpackage`.
 Now the actual maintenance.
 
 Sorry, not yet documented. Only marked as FIXME
+
+
+
+Hints, trick and tips
+---------------------
+
+* When using `quilt` have done `export QUILT_PATCHES=debian/patches`
