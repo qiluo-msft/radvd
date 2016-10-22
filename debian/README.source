@@ -1,0 +1,21 @@
+
+Hi,
+
+The hard part of _writing_ this _readme_ was imaging the audience.
+
+
+Most likely you want to work on the radvd debian package.
+
+Assumed is that `debcheckout radvd` is being done.
+
+Have installed 'git-buildpackage',
+it is a "maintainers build dependency"  8^)
+
+Have done `git-pbuilder create` at least once.
+
+Verify that you can rebuild this package,
+do `gbp buildpackage`.
+
+Now the actual maintenance.
+
+Sorry, not yet documented. Only marked as FIXME
