@@ -11,7 +11,12 @@ Assumed is that `debcheckout radvd` is being done.
 Have installed 'git-buildpackage',
 it is a "maintainers build dependency"  8^)
 
+Other packages that are needed:
+- debhelper
+- dh-autoreconf
+
 Have done `git-pbuilder create` at least once.
+(FYI Updating has to be done with `git-pbuilder update`)
 
 Verify that you can rebuild this package,
 do `gbp buildpackage`.
@@ -22,7 +27,7 @@ Sorry, not yet documented. Only marked as FIXME
 
 
 
-Hints, trick and tips
----------------------
+Hints, tricks and tips
+----------------------
 
 * When using `quilt` have done `export QUILT_PATCHES=debian/patches`
