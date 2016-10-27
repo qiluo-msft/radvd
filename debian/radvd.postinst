@@ -7,8 +7,8 @@ if [ "$1" = configure ]; then
     adduser --quiet --system --no-create-home --home /var/run/radvd radvd
   fi
   for i in /var/run/radvd; do
-    if ! dpkg-statoverride --list $i >/dev/null; then
-      dpkg-statoverride --update --add radvd root 4755 $i
+    if dpkg-statoverride --list $i >/dev/null; then
+      dpkg-statoverride --remove $i
     fi
   done
 fi
