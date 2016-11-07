@@ -30,7 +30,7 @@ Untested, consider this as a FIXME
 * verify integrety of the tarball
 * gbp import the tarball
 * update the debian directory, the actual actual maintenance
-* build
+* build with `gbp buildpackage`
 * check
 * double check
 * git tag debain/cer
