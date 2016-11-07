@@ -12,6 +12,7 @@ export DEB_BUILD_OPTIONS=nocheck
 ## Not Now
 
 override_dh_auto_clean:
+	dh_auto_clean
 	rm -f gram.c gram.h scanner.c
 	rm -f privsep.c
 
