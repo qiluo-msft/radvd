@@ -23,7 +23,19 @@ do `gbp buildpackage`.
 
 Now the actual maintenance.
 
-Sorry, not yet documented. Only marked as FIXME
+Untested, consider this as a FIXME
+
+* upstream has new tarball release
+* download it plus the signature and checksums
+* verify integrety of the tarball
+* gbp import the tarball
+* update the debian directory, the actual actual maintenance
+* build
+* check
+* double check
+* git tag debain/cer
+* sign
+* dput
 
 
 
