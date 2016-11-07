@@ -1,7 +1,8 @@
 Source: radvd
 Section: net
 Priority: optional
-Maintainer: Ghe Rivero <ghe@debian.org>
+# Maintainer: Ghe Rivero <ghe@debian.org>  https://bugs.debian.org/843502
+Maintainer: Geert Stappers <stappers@debian.org>
 Standards-Version: 3.9.8
 Build-Depends: dh-autoreconf, debhelper (>= 9), flex, bison,
  pkg-config,
