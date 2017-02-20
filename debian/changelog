@@ -1,4 +1,4 @@
-radvd (1:2.16-1) UNRELEASED; urgency=medium
+radvd (1:2.16-1) unstable; urgency=medium
 
   * New upstream release.
 
