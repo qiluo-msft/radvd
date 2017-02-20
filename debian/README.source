@@ -58,8 +58,8 @@ The maintenance more in shell commands
   echo check again :-)
   git tag | grep debian | tail -n 3 # to see previous tags
   git tag debian/1%${VER}-1
-  git push master
-  git push upstream # because updated with `gbp import-orig`
+  git push origin master
+  git push origin upstream # because updated with `gbp import-orig`
   git push --tags
   #
   # debrsign -kGPGkey host_with_GPGkey ../radvd_${VER}-1_armhf.changes
