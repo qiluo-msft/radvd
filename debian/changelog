@@ -1,3 +1,9 @@
+radvd (1:2.16-2) unstable; urgency=medium
+
+  * radvdump in a seperate package
+
+ -- Geert Stappers <stappers@debian.org>  Sun, 04 Jun 2017 23:44:18 +0200
+
 radvd (1:2.16-1) unstable; urgency=medium
 
   * New upstream release.

@@ -28,3 +28,12 @@ Description: Router Advertisement Daemon
  ADVertisement Daemon. This daemon listens to router solicitations (RS)
  and answers with router advertisement (RA). Furthermore unsolicited
  RAs are also sent from time to time.
+
+Package: radvdump
+Architecture: any
+Depends: ${shlibs:Depends},
+  ${misc:Depends}
+Conflicts: radvd (<= 1:2.16-1)
+Description: dumps Router Advertisements
+ Tool for IPv6 network administrators.
+ Dumps RA, Router Advertisements.

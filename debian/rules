@@ -17,9 +17,7 @@ override_dh_auto_clean:
 	rm -f privsep.c
 
 override_dh_install:
-	install -m 644 debian/simple-radvd.conf `pwd`/debian/radvd/usr/share/doc/radvd/examples/
-	install -m 644 radvd.conf.example `pwd`/debian/radvd/usr/share/doc/radvd/examples/
-	install -m 644 INTRO.html `pwd`/debian/radvd/usr/share/doc/radvd/
+	dh_install --list-missing
 
 override_dh_installinit:
 	dh_installinit --error-handler=true
