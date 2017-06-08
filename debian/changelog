@@ -1,3 +1,9 @@
+radvd (1:2.16-3) unstable; urgency=medium
+
+  * Remove linux/if_arp.h from configure.ac  Closes: #864269
+
+ -- Geert Stappers <stappers@debian.org>  Thu, 08 Jun 2017 22:06:46 +0200
+
 radvd (1:2.16-2) unstable; urgency=medium
 
   * radvdump in a seperate package
