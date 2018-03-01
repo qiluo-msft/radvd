@@ -9,7 +9,8 @@ Build-Depends: dh-autoreconf, debhelper (>= 9), flex, bison,
  libdaemon-dev,
  check
 XS-Testsuite: autopkgtest
-Vcs-Git: http://stappers.it/git/pkg-radvd
+Vcs-Git: https://salsa.debian.org/debian/radvd
+Vcs-Browser: https://salsa.debian.org/debian/radvd
 Homepage: http://www.litech.org/radvd/
 
 Package: radvd

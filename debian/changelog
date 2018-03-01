@@ -1,3 +1,9 @@
+radvd (1:2.16-3.1) UNRELEASED; urgency=medium
+
+  * Moved to Salsa. Closes: #843502
+
+ -- Geert Stappers <stappers@debian.org>  Thu, 01 Mar 2018 22:34:22 +0100
+
 radvd (1:2.16-3) unstable; urgency=medium
 
   * Remove linux/if_arp.h from configure.ac  Closes: #864269
