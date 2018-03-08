@@ -41,9 +41,9 @@ Now the actual maintenance.
 
 The maintenance more in shell commands
 
-  export VER=2.16
+  export VER=2.18
   uscan # does download and checks integrety
-  gbp import-orig ../radvd_${VER}.orig.tar.gz
+  gbp import-orig ../radvd_${VER}.orig.tar.xz
   ## the actual maintaince
   ##  ...
   ##  ...
