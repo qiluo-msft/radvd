@@ -1,6 +1,7 @@
 radvd (1:2.17-2) UNRELEASED; urgency=medium
 
   * d/changelog: Remove trailing whitespaces
+  * d/control: Remove XS-Testsuite field, not needed anymore
 
  -- Ondřej Nový <onovy@debian.org>  Mon, 01 Oct 2018 10:20:28 +0200
 
