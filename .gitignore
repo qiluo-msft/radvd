@@ -1,0 +1,39 @@
+#
+# .gitignore, lists files that git should ignore.
+#
+# Generated prebuild stuff
+aclocal.m4
+autom4te.cache/
+config.h
+config.h.in~
+config.log
+config.status
+config.guess
+config.h.in
+config.sub
+configure
+depcomp
+Makefile
+Makefile.in
+stamp-h1
+ylwrap
+#
+# More generated stuff
+gram.c
+gram.h
+libradvd-parser.a
+scanner.c
+#
+# object files
+*.o
+#
+# Actual build artifacts
+#  Binaries
+radvd
+radvdump
+#  Manual pages
+radvd.8
+radvd.conf.5
+radvdump.8
+#
+# l l
