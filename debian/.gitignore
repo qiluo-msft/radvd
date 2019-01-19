@@ -1,0 +1,11 @@
+#
+# files generated at  .deb build time
+.debhelper/
+autoreconf.after
+autoreconf.before
+files
+radvd.debhelper.log
+radvd.substvars
+radvdump.debhelper.log
+radvdump.substvars
+tmp/
