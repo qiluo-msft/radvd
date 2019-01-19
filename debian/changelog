@@ -1,3 +1,9 @@
+radvd (1:2.17-1~bpo9+1) stretch-backports; urgency=medium
+
+  * Rebuild for stretch-backports.
+
+ -- Felix Geyer <fgeyer@debian.org>  Fri, 16 Mar 2018 16:26:05 +0100
+
 radvd (1:2.17-1) unstable; urgency=medium
 
   * Moved to Salsa. Closes: #843502
