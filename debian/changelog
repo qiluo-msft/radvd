@@ -1,3 +1,10 @@
+radvd (1:2.17-2~bpo9+1) stretch-backports; urgency=medium
+
+  [ Luca Boccassi ]
+  * No router advertisement on tunnel interfaces patch
+
+ -- Geert Stappers <stappers@paddy.gpm.stappers.nl>  Sun, 20 Jan 2019 13:46:52 +0100
+
 radvd (1:2.17-1~bpo9+1) stretch-backports; urgency=medium
 
   * Rebuild for stretch-backports.
