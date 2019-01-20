@@ -22,7 +22,7 @@ Have done `git-pbuilder create` at least once.
 (FYI Updating has to be done with `git-pbuilder update`)
 
 Verify that you can rebuild this package,
-do `gbp buildpackage`.
+do `gbp buildpackage --git-pbuilder`.
 
 Now the actual maintenance.
 
@@ -48,7 +48,7 @@ The maintenance more in shell commands
   ##  ...
   ##  ...
   ##  dch -i
-  gbp buildpackage -uc -us
+  gbp buildpackage --git-pbuilder -uc -us
   lintian
   sudo dpkg --install ../radvd_${VER}*.deb
   sudo dpkg --remove radvd
