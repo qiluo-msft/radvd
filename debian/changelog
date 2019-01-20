@@ -4,6 +4,9 @@ radvd (1:2.17-2) UNRELEASED; urgency=medium
   * d/changelog: Remove trailing whitespaces
   * d/control: Remove XS-Testsuite field, not needed anymore
 
+  [ Luca Boccassi ]
+  * No router advertisement on tunnel interfaces patch
+
   [ Geert Stappers ]
   * Added .gitignore files.
 
