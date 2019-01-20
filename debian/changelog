@@ -4,10 +4,12 @@ radvd (1:2.17-2~bpo9+1) stretch-backports; urgency=medium
   * No router advertisement on tunnel interfaces patch
 
   [ Geert Stappers ]
-  * Added .gitignore files.
+  * Added .gitignore files
   * gbp Debian branch is debian/stretch-backports
+  * Rebuild for stretch
+  * Upload
 
- -- Geert Stappers <stappers@debian.org>  Sun, 20 Jan 2019 13:53:57 +0100
+ -- Geert Stappers <stappers@debian.org>  Sun, 20 Jan 2019 22:05:49 +0100
 
 radvd (1:2.17-1~bpo9+1) stretch-backports; urgency=medium
 
