@@ -7,6 +7,6 @@
 git config user.name "Geert Stappers"
 git config user.email stappers@debian.org
 
-git config url."rosa.stappers.it:/srv/git/pkg-radvd".PushInsteadOf http://stappers.it/git/pkg-radvd
+# git config url."rosa.stappers.it:/srv/git/pkg-radvd".PushInsteadOf http://stappers.it/git/pkg-radvd
 
 # l l
