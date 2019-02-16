@@ -200,9 +200,14 @@ int check_iface(struct Interface *iface)
 
 	if ((iface->AdvLinkMTU != 0) && ((iface->AdvLinkMTU < MIN_AdvLinkMTU) ||
 					 (iface->sllao.if_maxmtu != -1 && (iface->AdvLinkMTU > iface->sllao.if_maxmtu)))) {
-		flog(LOG_ERR, "AdvLinkMTU for %s (%u) must be zero or between %u and %u", iface->props.name, iface->AdvLinkMTU,
+		// FIXME: Temporary workaround for SONiC. Currently, when interfaces are added
+		// or removed from VLANs, the kernel sets the MTU size for the VLAN to the
+		// default value of 1500. Here, we prevent radvd from treating a larger value
+		// in its configuration as an error. Instead of logging an error and setting
+		// res to -1, we simply log a warning and continue on. Once the aforementioned
+		// behavior is addressed, this patch should be removed.
+		flog(LOG_WARNING, "AdvLinkMTU for %s (%u) must be zero or between %u and %u", iface->props.name, iface->AdvLinkMTU,
 		     MIN_AdvLinkMTU, iface->sllao.if_maxmtu);
-		res = -1;
 	}
 
 	if (iface->ra_header_info.AdvReachableTime > MAX_AdvReachableTime) {
