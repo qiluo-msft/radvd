@@ -1,0 +1,33 @@
+Description: No router advertisements on tunnel interfaces
+ The upstream commit 0c4dfeb889c9 ("improve multicast check, remove
+ broadcast check") forces UnicodeOnly if an interface does not support
+ IFF_MULTICAST. This stops periodic RAs being sent over tunnels, which
+ previously used to work. The solution is to allow sending such
+ multicast packets over point-to-point links. This is acceptable for
+ directly connected devices, or for tunnels, the packets are
+ encapsulated and so look like unicast packets to intervening routers.
+Author: Mike Manning <mmanning@brocade.com>
+Forwarded: https://github.com/reubenhwk/radvd/pull/94
+Applied-Upstream: 86a0b80e2a344d0b43b2d519525724a3949054d4
+Last-Update: 2018-11-05
+--- a/device-common.c
++++ b/device-common.c
+@@ -45,11 +45,15 @@ int check_device(int sock, struct Interf
+ 		dlog(LOG_ERR, 4, "%s is running", iface->props.name);
+ 	}
+ 
+-	if (!iface->UnicastOnly && !(ifr.ifr_flags & IFF_MULTICAST)) {
+-		flog(LOG_INFO, "%s does not support multicast, forcing UnicastOnly", iface->props.name);
++	if (!iface->UnicastOnly &&
++	    !(ifr.ifr_flags & (IFF_MULTICAST | IFF_POINTOPOINT))) {
++		flog(LOG_INFO,
++		     "%s does not support multicast or point-to-point, forcing UnicastOnly",
++		     iface->props.name);
+ 		iface->UnicastOnly = 1;
+ 	} else {
+-		dlog(LOG_ERR, 4, "%s supports multicast", iface->props.name);
++		dlog(LOG_ERR, 4, "%s supports multicast or is point-to-point",
++		     iface->props.name);
+ 	}
+ 
+ 	return 0;
